@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build (default)",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File ./scripts/build_windows.ps1 -Compiler msvc -Config Debug",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$msCompile"
+      ]
+    },
+    {
+      "label": "Test (Windows)",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File ./scripts/build_windows.ps1 -Compiler msvc -Config Debug -RunTests"
+    }
+  ]
+}

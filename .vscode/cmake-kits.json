@@ -1,0 +1,16 @@
+[
+  {
+    "name": "VsDevCmd: VS 18 Community (x64) + Ninja",
+    "environmentSetupScript": "C:/Program Files/Microsoft Visual Studio/18/Community/Common7/Tools/VsDevCmd.bat",
+    "preferredGenerator": {
+      "name": "Ninja"
+    }
+  },
+  {
+    "name": "VsDevCmd: VS 2022 Community (x64) + Ninja",
+    "environmentSetupScript": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/Tools/VsDevCmd.bat",
+    "preferredGenerator": {
+      "name": "Ninja"
+    }
+  }
+]

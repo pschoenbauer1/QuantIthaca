@@ -1,0 +1,25 @@
+{
+  "editor.formatOnSave": true,
+  "cmake.useCMakePresets": "always",
+  "cmake.useVsDeveloperEnvironment": "always",
+  "cmake.ignoreKitEnv": false,
+  "cmake.configurePreset": "windows-msvc-debug",
+  "cmake.buildPreset": "windows-msvc-debug",
+  "cmake.automaticReconfigure": true,
+  "workbench.sideBar.location": "left",
+  "workbench.panel.defaultLocation": "left",
+  "workbench.iconSize": "large",
+  "workbench.activityBar.orientation": "vertical",
+  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+  "cmake.options.advanced": {
+    "configurePreset": {
+      "statusBarVisibility": "visible"
+    },
+    "buildPreset": {
+      "statusBarVisibility": "visible"
+    },
+    "testPreset": {
+      "statusBarVisibility": "visible"
+    }
+  }
+}
