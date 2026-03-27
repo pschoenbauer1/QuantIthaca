@@ -20,13 +20,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nanobind)
 
+add_subdirectory(cpp/src/context)
 add_subdirectory(cpp/src/utils)
 
 add_library(core STATIC
   cpp/src/core.cpp
 )
 target_include_directories(core PUBLIC cpp/include)
-target_link_libraries(core PUBLIC utils)
+target_link_libraries(core PUBLIC utils context)
 
 nanobind_add_module(core_bind cpp/src/bindings.cpp)
 target_link_libraries(core_bind PRIVATE core utils)
@@ -44,6 +45,7 @@ if(BUILD_TESTING)
 
   add_executable(core_tests
     tests/cpp/test_core.cpp
+    tests/cpp/test_graph.cpp
     tests/cpp/test_utils.cpp
   )
   target_link_libraries(core_tests PRIVATE core utils GTest::gtest_main)

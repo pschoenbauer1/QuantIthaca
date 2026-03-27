@@ -3,12 +3,19 @@
 
 #include <deque>
 #include <functional>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <shared_mutex>
 #include <thread>
 
 namespace utils {
+
+using Mutex = std::shared_mutex;
+using ReadLock = std::shared_lock<std::shared_mutex>;
+using WriteLock = std::unique_lock<std::shared_mutex>;
+
 class ThreadPool {
     int _num_threads;
     std::queue<std::function<void()>> _queue;
@@ -24,9 +31,24 @@ class ThreadPool {
     ~ThreadPool();
 
     template <typename F>
-    void push(F&& f) {
-        _queue.push(f);
+    auto push(F&& f) -> std::future<decltype(f())> {
+        using ReturnType = decltype(f());
+        const auto promise = std::make_shared<std::promise<ReturnType>>();
+        const auto f_wrapped = [this, &f, promise]() {
+            if constexpr (std::is_void_v<ReturnType>) {
+                f();
+                promise->set_value();
+            } else {
+                auto value = f();
+                promise->set_value(std::move(value));
+            }
+        };
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _queue.push(f_wrapped);
+        }
         _cv.notify_one();
+        return promise->get_future();
     }
 
     void wait() {
