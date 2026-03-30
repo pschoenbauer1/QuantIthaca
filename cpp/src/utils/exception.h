@@ -47,5 +47,7 @@ void operator|(const RuntimeErrorBuilderHelper&, const RuntimeErrorBuilder& buil
 
 }  // namespace
 
-#define THROW \
-    RuntimeErrorBuilderHelper{} | RuntimeErrorBuilder {}
+// clang-format off
+
+#define THROW RuntimeErrorBuilderHelper{} | RuntimeErrorBuilder {}
+#define PS_EXPECT_THAT(condition) if(!(condition)) THROW 

@@ -17,31 +17,34 @@ class Node {
    public:
     virtual ~Node() = default;
 
-    virtual std::vector<GraphKey> dependencies() const = 0;
-    virtual CPtr<GraphValue> value(const Graph& graph) const = 0;
+    virtual GraphKey key() const = 0;
+    virtual const KeySet& dependencies() const = 0;
+    virtual CPtr<GraphValue> value(const Graph& graph) const {
+        THROW << "This node does not implement a 'value' function. This is a data node.";
+        return nullptr;
+    }
 };
 
 class DummyNode1 : public Node {
+    DummyKey1 _key;
+    KeySet _dependencies;
+
    public:
     DummyNode1(const DummyKey1&);
-    std::vector<GraphKey> dependencies() const override;
-    CPtr<GraphValue> value(const Graph& graph) const override;
+    GraphKey key() const override { return _key; }
+    const KeySet& dependencies() const override { return _dependencies; }
+    // CPtr<GraphValue> value(const Graph& graph) const override;
 };
+
 class DummyNode2 : public Node {
+    DummyKey2 _key;
+    KeySet _dependencies;
+
    public:
     DummyNode2(const DummyKey2&);
-    std::vector<GraphKey> dependencies() const override;
-    CPtr<GraphValue> value(const Graph& graph) const override;
+    GraphKey key() const override { return _key; }
+    const KeySet& dependencies() const override { return _dependencies; }
+    // CPtr<GraphValue> value(const Graph& graph) const override;
 };
-
-template <KeyLike Key>
-CPtr<Node> get_node(const Key& key);
-
-CPtr<Node> get_node(const DummyKey1& key) {
-    return std::make_shared<DummyNode1>(key);
-}
-CPtr<Node> get_node(const DummyKey2& key) {
-    return std::make_shared<DummyNode2>(key);
-}
 
 }  // namespace graph

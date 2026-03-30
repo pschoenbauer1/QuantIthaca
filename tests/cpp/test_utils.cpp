@@ -11,9 +11,9 @@
 #include "core.hpp"
 #include "graph.h"
 #include "heap.h"
+#include "py_calls.h"
 #include "sort.h"
 #include "threads.h"
-
 
 TEST(UtilsTest, TestThreadPool) {
     utils::ThreadPool p(4);
@@ -73,4 +73,7 @@ TEST(UtilsTest, TestHeap) {
     EXPECT_EQ(heap.top(), -100.0);
 }
 
-
+TEST(TestCallback, TestCallback) {
+    std::string callbackstr = callback::test_callback();
+    EXPECT_EQ(callbackstr, "Hello C++! Python Here!");
+}

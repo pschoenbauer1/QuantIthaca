@@ -19,7 +19,9 @@
       "name": "windows-msvc-debug",
       "inherits": "base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "Python_EXECUTABLE": "${sourceDir}/.venv/Scripts/python.exe",
+        "Python_ROOT_DIR": "${sourceDir}/.venv"
       },
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {

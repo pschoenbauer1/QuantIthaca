@@ -40,6 +40,7 @@ class ValueWrapper {
     std::variant<std::monostate, CPtr<GraphValue>, std::exception_ptr> _data{};
     mutable utils::Mutex _mutex;
 
+   public:
     // --- state checks ---
     bool is_empty() const {
         utils::ReadLock lock(_mutex);
@@ -56,7 +57,6 @@ class ValueWrapper {
         return std::holds_alternative<std::exception_ptr>(_data);
     }
 
-   public:
     ValueWrapper() = default;
     ValueWrapper(const CPtr<GraphValue>& value) { set_value(value); }
     ValueWrapper(std::exception_ptr error) { set_error(error); }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_set>
+
 #include "exception.h"
 #include "graph_key.h"
 #include "graph_value.h"
@@ -9,7 +11,9 @@
 
 namespace graph {
 
-using KeyValueMap = std::unordered_map<GraphKey, CPtr<ValueWrapper>, utils::TupleHash>;
+template <typename T>
+using KeyMap = std::unordered_map<GraphKey, T, utils::TupleHash>;
+using KeySet = std::unordered_set<GraphKey, utils::TupleHash>;
 
 template <typename T>
 concept KeyLike = requires(const T t) {
@@ -25,11 +29,11 @@ class Graph {
     struct GraphImpl;
     Ptr<GraphImpl> _impl;
 
-    void __set_value(const GraphKey& key, const CPtr<GraphValue>& value);
+    void __insert(const GraphKey& key, const CPtr<GraphValue>& value);
 
    public:
     Graph();
-    Graph(std::unordered_map<GraphKey, CPtr<ValueWrapper>, utils::TupleHash> map);
+    Graph(std::unordered_map<GraphKey, Ptr<ValueWrapper>, utils::TupleHash> map);
 
     CPtr<GraphValue> value(const GraphKey& key) const;
 
@@ -45,8 +49,10 @@ class Graph {
     }
 
     template <KeyLike Key>
-    void set_value(const Key& key, const CPtr<typename Key::ValueType>& value) {
-        __set_value(key, value);
+    void insert(const Key& key, const CPtr<typename Key::ValueType>& value) {
+        __insert(key, value);
     }
+
+    void request(const std::unordered_set<GraphKey>& key);
 };
 }  // namespace graph

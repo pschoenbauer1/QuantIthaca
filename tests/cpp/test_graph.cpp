@@ -21,9 +21,9 @@ TEST(GraphTest, TestConstruction) {
 
     graph::Graph ctxt;
 
-    ctxt.set_value(key1a, std::make_shared<graph::DummyValue1>(3.14));
-    ctxt.set_value(key1b, std::make_shared<graph::DummyValue1>(-3.14));
-    ctxt.set_value(key2a, std::make_shared<graph::DummyValue2>(1000.1));
+    ctxt.insert(key1a, std::make_shared<graph::DummyValue1>(3.14));
+    ctxt.insert(key1b, std::make_shared<graph::DummyValue1>(-3.14));
+    ctxt.insert(key2a, std::make_shared<graph::DummyValue2>(1000.1));
 
     std::cout << ctxt.value(key1a)->get_x() << std::endl;
     std::cout << ctxt.value(key1b)->get_x() << std::endl;

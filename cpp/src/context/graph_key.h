@@ -23,7 +23,7 @@ struct DummyKey2 {
 
     using ValueType = DummyValue2;
     static std::string name() { return "DummyKey2"; }
-    std::string to_string() const { return "str"; }
+    std::string to_string() const { return str; }
     auto to_tuple() const { return std::make_tuple(str); }
     auto operator<=>(const DummyKey2&) const = default;
 };
