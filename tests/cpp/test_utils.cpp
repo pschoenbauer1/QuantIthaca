@@ -74,6 +74,6 @@ TEST(UtilsTest, TestHeap) {
 }
 
 TEST(TestCallback, TestCallback) {
-    std::string callbackstr = callback::test_callback();
+    auto callbackstr = py_calls::py_call<std::string>("test_callback");
     EXPECT_EQ(callbackstr, "Hello C++! Python Here!");
 }

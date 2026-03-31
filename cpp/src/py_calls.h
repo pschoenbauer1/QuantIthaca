@@ -6,11 +6,14 @@
 #include <filesystem>
 #include <fstream>
 #include <mutex>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
+#include <utility>
 
 namespace py = pybind11;
 
-namespace callback {
+namespace py_calls {
 
 /// One-time embedded Python setup: env from `.venv/pyvenv.cfg`, interpreter, and `sys.path`.
 /// Call at the start of any function that imports or calls into Python (then acquire GIL).
@@ -57,20 +60,21 @@ inline void ensure_python_runtime() {
         std::filesystem::path(__FILE__).parent_path().parent_path().parent_path());
 }
 
-inline std::string test_callback() {
+template <typename ReturnT, typename... Args>
+inline ReturnT py_call(const std::string& py_function, Args&&... args) {
     try {
         ensure_python_runtime();
 
         py::gil_scoped_acquire gil{};
         py::module_ mod = py::module_::import("cpp_callbacks");
-        py::object func = mod.attr("test_callback");
-        py::object result = func();
-        return result.cast<std::string>();
+        py::object func = mod.attr(py_function.c_str());
+        py::object result = func(std::forward<Args>(args)...);
+        return result.cast<ReturnT>();
     } catch (const py::error_already_set& e) {
-        return std::string("Python error: ") + e.what();
+        throw std::runtime_error(std::string("Python error: ") + e.what());
     } catch (const std::exception& e) {
-        return std::string("Error: ") + e.what();
+        throw std::runtime_error(std::string("Error: ") + e.what());
     }
 }
 
-}  // namespace callback
+}  // namespace py_calls

@@ -63,10 +63,11 @@ class ValueWrapper {
 
     // --- accessors ---
     CPtr<GraphValue> value() const {
+        utils::ReadLock lock(_mutex);
+
         rethrow_if_error();
         throw_if_empty();
 
-        utils::ReadLock lock(_mutex);
         return std::get<CPtr<GraphValue>>(_data);
     }
 
