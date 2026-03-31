@@ -11,7 +11,7 @@
 #include "core.hpp"
 #include "graph.h"
 #include "heap.h"
-#include "py_calls.h"
+#include "py_bridge.h"
 #include "sort.h"
 #include "threads.h"
 
@@ -74,6 +74,6 @@ TEST(UtilsTest, TestHeap) {
 }
 
 TEST(TestCallback, TestCallback) {
-    auto callbackstr = py_calls::py_call<std::string>("test_callback", "hi there");
+    auto callbackstr = py_bridge::call_python<std::string>("test_callback", "hi there");
     EXPECT_EQ(callbackstr, "Hello C++! Python Here! You said hi there.");
 }

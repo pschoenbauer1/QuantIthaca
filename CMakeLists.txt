@@ -58,6 +58,7 @@ target_link_libraries(core PUBLIC utils context)
 
 nanobind_add_module(core_bind cpp/src/bindings.cpp)
 target_link_libraries(core_bind PRIVATE core utils)
+target_compile_definitions(core_bind PRIVATE PY_BRIDGE_USE_NANOBIND)
 
 install(TARGETS core LIBRARY DESTINATION quantithaca)
 
@@ -88,6 +89,7 @@ if(BUILD_TESTING AND NOT SKBUILD)
   )
   target_include_directories(core_tests PRIVATE cpp/src)
   target_link_libraries(core_tests PRIVATE core utils GTest::gtest_main pybind11::embed)
+  target_compile_definitions(core_tests PRIVATE PY_BRIDGE_USE_PYBIND)
 
   # Build-time gtest discovery executes core_tests.exe; on Windows it must find
   # python312.dll at process startup.
