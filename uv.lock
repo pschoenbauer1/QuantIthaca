@@ -228,17 +228,13 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "pandas" },
-]
-
-[package.optional-dependencies]
-test = [
     { name = "pytest" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "pandas", specifier = ">=3.0.1" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0.0" },
+    { name = "pytest", specifier = ">=8.0.0" },
 ]
 provides-extras = ["test"]
 

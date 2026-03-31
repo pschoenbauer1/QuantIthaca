@@ -16,12 +16,11 @@ authors = [
 ]
 dependencies = [
     "pandas>=3.0.1",
+    "pytest>=8.0.0",
 ]
 
 [project.optional-dependencies]
-test = [
-  "pytest>=8.0.0",
-]
+test = []
 
 [tool.scikit-build]
 minimum-version = "build-system.requires"

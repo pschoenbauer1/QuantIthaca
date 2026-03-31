@@ -11,6 +11,12 @@
   "workbench.iconSize": "large",
   "workbench.activityBar.orientation": "vertical",
   "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": [
+    "-s",
+    "tests/python"
+  ],
   "cmake.options.advanced": {
     "configurePreset": {
       "statusBarVisibility": "visible"

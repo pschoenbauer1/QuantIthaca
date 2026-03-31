@@ -82,7 +82,6 @@ if(BUILD_TESTING AND NOT SKBUILD)
   FetchContent_MakeAvailable(googletest)
 
   add_executable(core_tests
-    cpp/src/nb_callback.cpp
     tests/cpp/test_core.cpp
     tests/cpp/test_graph.cpp
     tests/cpp/test_utils.cpp
