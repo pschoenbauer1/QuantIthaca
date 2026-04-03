@@ -1,3 +1,8 @@
+# Secrets and local env (never commit real credentials)
+.env
+.env.*
+!.env.example
+
 .venv/
 __pycache__/
 *.pyc
