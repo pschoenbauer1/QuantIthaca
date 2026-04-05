@@ -43,7 +43,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = []
+test = [
+    "pypdf>=5.0.0",
+]
 
 [tool.scikit-build]
 minimum-version = "build-system.requires"

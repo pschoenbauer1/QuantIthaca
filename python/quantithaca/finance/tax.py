@@ -2,6 +2,7 @@
 
 import pandas as pd
 import numpy as np
+import datetime as dt
 import os
 import re
 
@@ -17,6 +18,10 @@ def read_taxrates_aut(year:int):
     data = pd.read_excel(f"{TAX_DIRECTORY}/pnl.xlsx", sheet_name="aut_tax_brackets")
     data = data[data["year"]==year]
     return data
+
+def read_EURGBP_rate(year:int):
+    data = pd.read_excel(f"{TAX_DIRECTORY}/pnl.xlsx", sheet_name="fx_rates")
+    return data.set_index["year"].loc[year]["EURGBP"]
 
 def compute_pnl_aut(year:int):
     pnl = read_pnl()
@@ -48,17 +53,54 @@ def compute_pnl_aut(year:int):
     pnl_grouped2 = pnl_grouped1.groupby(["bu", "ccy"])["amount"].sum().reset_index()
     pnl_sum = pnl_grouped2.groupby("ccy")["amount"].sum()
 
-    print(pnl)
-    print(pnl_grouped1)
-    print(pnl_grouped2)
-    print(pnl_sum)
-
     assert pnl_sum.shape[0] == 1
     assert pnl_sum.index[0] == "EUR"
 
     pnl_total = pnl_sum.iloc[0]
 
     return pnl, pnl_total
+
+def compute_pnl_uk(year:int):
+    pnl = read_pnl()
+    bu = read_bu().rename(columns={"uk_tax_relevant":"bu_uk_tax_relevant"})
+    pnl_cat = read_pnl_categories().rename(columns={"uk_tax_relevant":"cat_uk_tax_relevant"})
+
+    pnl = pd.merge(pnl, bu, on = "bu")
+    pnl = pd.merge(pnl, pnl_cat, on = "category")
+
+    filter = (pnl["ref_date"].apply(du.to_date) >= dt.date(year-1,4,6)) & (pnl["ref_date"].apply(du.to_date) <= dt.date(year,4,5))
+
+    pnl = pnl[filter].copy()
+    pnl = pnl[pnl["bu_uk_tax_relevant"]].copy()
+    pnl = pnl[pnl["cat_uk_tax_relevant"]].copy()
+    pnl = pnl[["account_name",
+               "ref_date",
+               "group_idx",
+               "amount",
+               "bu",
+               "b_year",
+               "b_month",
+               "category",
+               "ccy", 
+               "bu_uk_tax_relevant",
+               "cat_uk_tax_relevant",
+               "is_income"]]
+
+    ccy_rate = read_EURGBP_rate(year)
+    pnl["ccy_rate"] = ccy_rate
+    pnl["ccy_rate"] = pnl["ccy_rate"].where(pnl["ccy"] == "EUR", 1.0)
+    pnl["GBP"] = pnl["amount"] / pnl["ccy_rate"]
+
+    logger.info(f"Processing {pnl.shape[0]} pnl lines for UK tax year {year}.")
+
+    pnl_grouped1 = pnl.groupby(["bu", "category", "ccy"])["amount"].sum().reset_index()
+    pnl_grouped2 = pnl_grouped1.groupby(["bu", "ccy"])["amount"].sum().reset_index()
+    pnl_sum = pnl_grouped2.groupby("ccy")["amount"].sum()
+
+    assert pnl_sum.shape[0] == 2
+    assert set(pnl_sum.index) == set(["EUR", "GBP"])
+
+    return pnl, pnl_sum
 
 
 def compute_tax_aut(year:int):
@@ -114,11 +156,12 @@ def tax_aut_write_pdf(year:int):
         f"{TAX_DIRECTORY}/reports/tax_aut_2024.pdf",
         #landscape=True,
         section_column_specs=col_specs,
-        overwrite=True)
+        #overwrite=True,
+        header_text=f"P&L and Tax AUT {year}")
     
 
 
 if __name__ == "__main__":
-    tax = tax_aut_write_pdf(2024) 
-    
-    # pdf_tables.dataframes_to_pdf(tax, f"{TAX_DIRECTORY}/reports/tax_aut_2024.pdf")
+    #tax = tax_aut_write_pdf(2024) 
+
+     compute_pnl_uk(2025)   

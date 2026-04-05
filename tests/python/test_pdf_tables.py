@@ -15,6 +15,31 @@ def test_dataframes_to_pdf_creates_file(tmp_path):
     assert out.stat().st_size > 500
 
 
+def test_dataframes_to_pdf_no_trailing_blank_page(tmp_path):
+    """A trailing Spacer after the last table used to orphan an empty final page."""
+    pytest.importorskip("pypdf")
+    from pypdf import PdfReader
+
+    out = tmp_path / "one.pdf"
+    df = pd.DataFrame({"a": range(30), "b": ["x"] * 30})
+    dataframes_to_pdf({"S": df}, out)
+    assert len(PdfReader(str(out)).pages) == 1
+
+
+def test_dataframes_to_pdf_multi_section_page_break(tmp_path):
+    pytest.importorskip("pypdf")
+    from pypdf import PdfReader
+
+    out = tmp_path / "two.pdf"
+    dataframes_to_pdf(
+        {"A": pd.DataFrame({"a": [1]}), "B": pd.DataFrame({"b": [2]})},
+        out,
+        show_header_date=False,
+        show_page_numbers=False,
+    )
+    assert len(PdfReader(str(out)).pages) == 2
+
+
 def test_dataframes_to_pdf_landscape(tmp_path):
     out = tmp_path / "landscape.pdf"
     data = {"Wide": pd.DataFrame({f"c{i}": [i] for i in range(12)})}
@@ -67,6 +92,59 @@ def test_display_scalar_date_without_time():
     assert _display_scalar(pd.Timestamp("2024-03-15 00:00:00")) == "2024-03-15"
     assert "00:00:00" not in _display_scalar(pd.Timestamp("2024-03-15 00:00:00"))
     assert _display_scalar(pd.Timestamp("2024-03-15 14:30:00")) == "2024-03-15 14:30:00"
+
+
+def test_dataframes_to_pdf_header_footer_and_page_numbers(tmp_path):
+    out = tmp_path / "hf.pdf"
+    dataframes_to_pdf(
+        {"S": pd.DataFrame({"a": [1]})},
+        out,
+        header_text="Quarterly report",
+        footer_text="Confidential",
+    )
+    assert out.is_file()
+    assert out.stat().st_size > 400
+
+
+def test_dataframes_to_pdf_custom_page_number_format(tmp_path):
+    out = tmp_path / "pn.pdf"
+    dataframes_to_pdf(
+        {"S": pd.DataFrame({"a": [1]})},
+        out,
+        page_number_format="- {page} -",
+    )
+    assert out.is_file()
+
+
+def test_dataframes_to_pdf_header_date_only(tmp_path):
+    out = tmp_path / "date_only.pdf"
+    dataframes_to_pdf(
+        {"S": pd.DataFrame({"a": [1]})},
+        out,
+        show_page_numbers=False,
+        header_date_format="%Y/%m/%d",
+    )
+    assert out.is_file()
+
+
+def test_dataframes_to_pdf_no_page_decorations(tmp_path):
+    out = tmp_path / "plain.pdf"
+    dataframes_to_pdf(
+        {"S": pd.DataFrame({"a": [1]})},
+        out,
+        show_page_numbers=False,
+        show_header_date=False,
+    )
+    assert out.is_file()
+
+
+def test_dataframes_to_pdf_page_number_format_requires_placeholder(tmp_path):
+    with pytest.raises(ValueError, match="page_number_format"):
+        dataframes_to_pdf(
+            {"S": pd.DataFrame({"a": [1]})},
+            tmp_path / "bad.pdf",
+            page_number_format="nope",
+        )
 
 
 def test_dataframes_to_pdf_multiindex_grouped(tmp_path):
