@@ -34,6 +34,10 @@ class Graph {
    public:
     Graph();
     Graph(std::unordered_map<GraphKey, Ptr<ValueWrapper>, utils::TupleHash> map);
+    Graph(Graph&&) = delete;
+    Graph(const Graph&) = delete;
+    Graph& operator=(const Graph&) = delete;
+    Graph& operator=(Graph&&) = delete;
 
     CPtr<GraphValue> value(const GraphKey& key) const;
 

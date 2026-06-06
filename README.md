@@ -78,10 +78,17 @@ All wheels are written to `wheelhouse/`.
 
 This builds wheels in Ubuntu containers for Python 3.11/3.12/3.13 and copies outputs into `wheelhouse/`.
 
-## VS Code F7 build
+## VS Code / Cursor build
 
-`F7` triggers the default build task (`Build (default)`) via `.vscode/tasks.json`, which runs:
+The default shortcut for **Run Build Task** is **Ctrl+Shift+B** (not F7). That runs the default task in `.vscode/tasks.json` (`Build (default)`), which invokes `scripts/build_windows.ps1` (MSVC Debug: `uv sync`, CMake preset configure, then build).
 
-- Windows MSVC Debug build script
+Visual Studio uses **F7** for build; VS Code/Cursor does **not** assign F7 to build unless you add a keybinding. To match Visual Studio, open **Keyboard Shortcuts (JSON)** and add:
 
-You can customize the default task for your preferred compiler/config.
+```json
+{
+  "key": "f7",
+  "command": "workbench.action.tasks.build"
+}
+```
+
+If the build task fails, ensure **Visual Studio** (or Build Tools) has the **Desktop development with C++** workload so `VsDevCmd.bat` exists, and that `uv` works from a terminal (the script runs `uv sync` and CMake via `uv run`).

@@ -47,6 +47,20 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nanobind)
 
+set(WITH_GFLAGS OFF CACHE BOOL "glog: skip gflags (optional)" FORCE)
+set(WITH_GTEST OFF CACHE BOOL "glog: skip GTest (project supplies its own)" FORCE)
+set(WITH_UNWIND none CACHE STRING "glog: unwind backend" FORCE)
+FetchContent_Declare(
+  glog
+  GIT_REPOSITORY https://github.com/google/glog.git
+  GIT_TAG v0.7.1
+)
+# glog defaults to SHARED; a separate glog.dll is then required at runtime. Windows
+# gtest_discover_tests runs core_tests.exe during the build — if glog.dll is not next to
+# the exe, load fails with 0xc0000135 (STATUS_DLL_NOT_FOUND). Static glog avoids that.
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build glog as static (see comment above)" FORCE)
+FetchContent_MakeAvailable(glog)
+
 add_subdirectory(cpp/src/context)
 add_subdirectory(cpp/src/utils)
 

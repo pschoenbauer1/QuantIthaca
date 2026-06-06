@@ -7,6 +7,9 @@ target_include_directories(utils PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+# sort.h and other headers include glog; propagate include + link to dependents.
+target_link_libraries(utils PUBLIC glog::glog)
+
 if(WIN32)
   # Ensure an import library is generated even without explicit
   # __declspec(dllexport) annotations on individual symbols.

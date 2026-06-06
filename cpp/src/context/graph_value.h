@@ -40,21 +40,54 @@ class ValueWrapper {
     std::variant<std::monostate, CPtr<GraphValue>, std::exception_ptr> _data{};
     mutable utils::Mutex _mutex;
 
+    bool _is_empty() const {
+        utils::ReadLock lock(_mutex);
+        return std::holds_alternative<std::monostate>(_data);
+    }
+    bool _has_value() const { return std::holds_alternative<CPtr<GraphValue>>(_data); }
+
+    bool _has_error() const { return std::holds_alternative<std::exception_ptr>(_data); }
+
+    void _rethrow_if_error() const {
+        if (_has_error()) {
+            utils::ReadLock lock(_mutex);
+            std::rethrow_exception(std::get<std::exception_ptr>(_data));
+        }
+    }
+    void _throw_if_empty() const {
+        if (_is_empty()) {
+            THROW << "Value is empty";
+        }
+    }
+
+    void _set_error(std::exception_ptr exc) {
+        if (!_is_empty()) {
+            THROW << "Attempted to set an error on a non-empty value wrapper.";
+        }
+        _data = exc;
+    }
+    void _set_value(CPtr<GraphValue> value) {
+        if (!_is_empty()) {
+            THROW << "Attempted to set a value on a non-empty value wrapper.";
+        }
+        _data = std::move(value);
+    }
+
    public:
     // --- state checks ---
     bool is_empty() const {
         utils::ReadLock lock(_mutex);
-        return std::holds_alternative<std::monostate>(_data);
+        return _is_empty();
     }
 
     bool has_value() const {
         utils::ReadLock lock(_mutex);
-        return std::holds_alternative<CPtr<GraphValue>>(_data);
+        return _has_value();
     }
 
     bool has_error() const {
         utils::ReadLock lock(_mutex);
-        return std::holds_alternative<std::exception_ptr>(_data);
+        return _has_error();
     }
 
     ValueWrapper() = default;
@@ -74,30 +107,21 @@ class ValueWrapper {
     std::exception_ptr error() const { return std::get<std::exception_ptr>(_data); }
 
     void rethrow_if_error() const {
-        if (has_error()) {
-            utils::ReadLock lock(_mutex);
-            std::rethrow_exception(std::get<std::exception_ptr>(_data));
-        }
+        utils::ReadLock lock(_mutex);
+        _rethrow_if_error();
     }
     void throw_if_empty() const {
-        if (is_empty()) {
-            THROW << "Value is empty";
-        }
+        utils::ReadLock lock(_mutex);
+        _throw_if_empty();
     }
 
     void set_error(std::exception_ptr exc) {
-        if (!is_empty()) {
-            THROW << "Attempted to set an error on a non-empty value wrapper.";
-        }
         utils::WriteLock lock(_mutex);
-        _data = exc;
+        _set_error(exc);
     }
     void set_value(CPtr<GraphValue> value) {
-        if (!is_empty()) {
-            THROW << "Attempted to set a value on a non-empty value wrapper.";
-        }
         utils::WriteLock lock(_mutex);
-        _data = std::move(value);
+        _set_value(value);
     }
 };
 }  // namespace graph

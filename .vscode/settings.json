@@ -6,6 +6,9 @@
   "cmake.configurePreset": "windows-msvc-debug",
   "cmake.buildPreset": "windows-msvc-debug",
   "cmake.automaticReconfigure": true,
+  "cmake.ctestArgs": [
+    "-V"
+  ],
   "workbench.sideBar.location": "left",
   "workbench.panel.defaultLocation": "left",
   "workbench.iconSize": "large",

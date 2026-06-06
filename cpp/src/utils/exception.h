@@ -5,15 +5,20 @@
 #include <string>
 #include <utility>
 
-namespace {
-struct RuntimeErrorBuilderHelper {};
+namespace
+{
+struct RuntimeErrorBuilderHelper
+{
+};
 
-class RuntimeErrorBuilder {
-   public:
+class RuntimeErrorBuilder
+{
+public:
     RuntimeErrorBuilder() = default;
 
     template <typename T>
-    RuntimeErrorBuilder&& operator<<(T&& value) && {
+    RuntimeErrorBuilder&& operator<<(T&& value) &&
+    {
         std::ostringstream oss;
         oss << message_ << std::forward<T>(value);
         message_ = oss.str();
@@ -21,7 +26,8 @@ class RuntimeErrorBuilder {
     }
 
     // Optional: support stream manipulators like std::endl
-    RuntimeErrorBuilder&& operator<<(std::ostream& (*manip)(std::ostream&)) && {
+    RuntimeErrorBuilder&& operator<<(std::ostream& (*manip)(std::ostream&)) &&
+    {
         std::ostringstream oss;
         oss << message_;
         manip(oss);
@@ -30,18 +36,21 @@ class RuntimeErrorBuilder {
     }
 
     // Conversion to std::runtime_error
-    operator std::runtime_error() const {
-        if (message_.empty()) {
+    operator std::runtime_error() const
+    {
+        if (message_.empty())
+        {
             return std::runtime_error("Exception");
         }
         return std::runtime_error(message_);
     }
 
-   private:
+private:
     std::string message_;
 };
 
-void operator|(const RuntimeErrorBuilderHelper&, const RuntimeErrorBuilder& builder) {
+void operator|(const RuntimeErrorBuilderHelper&, const RuntimeErrorBuilder& builder)
+{
     throw builder;
 }
 
@@ -51,3 +60,19 @@ void operator|(const RuntimeErrorBuilderHelper&, const RuntimeErrorBuilder& buil
 
 #define THROW RuntimeErrorBuilderHelper{} | RuntimeErrorBuilder {}
 #define PS_EXPECT_THAT(condition) if(!(condition)) THROW 
+
+template <typename T>
+concept ComparableToFloat = requires(T t)
+{
+    t < 0.0;
+    t > 0.0;
+    t <= 0.0;
+    t >= 0.0;
+};
+
+template <ComparableToFloat T>
+const T PS_VALIDATE_POSITIVE(const T& x)
+{
+    PS_EXPECT_THAT(x>0) << "Validation 'Positive' failed for x = " << x; 
+    return x;
+}
