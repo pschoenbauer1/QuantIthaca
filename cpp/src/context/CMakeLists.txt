@@ -1,5 +1,6 @@
 add_library(context SHARED
   graph.cpp
+  ../context_obj/dummy_obj1.cpp
 )
 
 # Allow consumers to include "threads.h" when they include from this library.

@@ -9,39 +9,32 @@
 #include "graph_key.h"
 #include "graph_value.h"
 
-namespace graph {
+namespace graph
+{
 
 class Graph;
 
-class Node {
-   public:
-    virtual ~Node() = default;
+class GraphBuilder
+{
+public:
+    virtual ~GraphBuilder() = default;
 
     virtual GraphKey key() const = 0;
     virtual const KeySet& dependencies() const = 0;
-    virtual CPtr<GraphValue> value(const Graph& graph) const {
+    virtual CPtr<GraphValue> value(const Graph& graph) const
+    {
         THROW << "This node does not implement a 'value' function. This is a data node.";
         return nullptr;
     }
 };
 
-class DummyNode1 : public Node {
-    DummyKey1 _key;
-    KeySet _dependencies;
-
-   public:
-    DummyNode1(const DummyKey1&);
-    GraphKey key() const override { return _key; }
-    const KeySet& dependencies() const override { return _dependencies; }
-    // CPtr<GraphValue> value(const Graph& graph) const override;
-};
-
-class DummyNode2 : public Node {
+class DummyGraphBuilder2 : public GraphBuilder
+{
     DummyKey2 _key;
     KeySet _dependencies;
 
-   public:
-    DummyNode2(const DummyKey2&);
+public:
+    DummyGraphBuilder2(const DummyKey2&);
     GraphKey key() const override { return _key; }
     const KeySet& dependencies() const override { return _dependencies; }
     // CPtr<GraphValue> value(const Graph& graph) const override;

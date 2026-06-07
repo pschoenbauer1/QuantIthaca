@@ -1,15 +1,16 @@
 #pragma once
 
+#include <context/graph_key.h>
+#include <context/graph_value.h>
+#include <utils/exception.h>
+#include <utils/hash.h>
+#include <utils/pointers.h>
+#include <utils/threads.h>
+
 #include <unordered_set>
 
-#include "exception.h"
-#include "graph_key.h"
-#include "graph_value.h"
-#include "hash.h"
-#include "pointers.h"
-#include "threads.h"
-
-namespace graph {
+namespace graph
+{
 
 template <typename T>
 using KeyMap = std::unordered_map<GraphKey, T, utils::TupleHash>;
@@ -25,13 +26,12 @@ concept KeyLike = requires(const T t) {
     { t.to_tuple() };
 };
 
-class Graph {
+class Graph
+{
     struct GraphImpl;
     Ptr<GraphImpl> _impl;
 
-    void __insert(const GraphKey& key, const CPtr<GraphValue>& value);
-
-   public:
+public:
     Graph();
     Graph(std::unordered_map<GraphKey, Ptr<ValueWrapper>, utils::TupleHash> map);
     Graph(Graph&&) = delete;
@@ -42,21 +42,20 @@ class Graph {
     CPtr<GraphValue> value(const GraphKey& key) const;
 
     template <KeyLike Key>
-    CPtr<typename Key::ValueType> value(const Key& key) const {
+    CPtr<typename Key::ValueType> value(const Key& key) const
+    {
         const auto& v = this->value(GraphKey(key));
         auto v_casted = std::dynamic_pointer_cast<const Key::ValueType>(v);
-        if (!v_casted) {
+        if (!v_casted)
+        {
             THROW << "Error fetching " << key.to_string()
                   << ". Wrong ValueType was returned; expected" << Key::ValueType::name() << ".";
         }
         return v_casted;
     }
 
-    template <KeyLike Key>
-    void insert(const Key& key, const CPtr<typename Key::ValueType>& value) {
-        __insert(key, value);
-    }
-
-    void request(const std::unordered_set<GraphKey>& key);
+    void insert(const GraphKey& key, CPtr<GraphValue> value);
+    void insert(const GraphKey& key);
+    void insert(const KeySet& keys);
 };
 }  // namespace graph

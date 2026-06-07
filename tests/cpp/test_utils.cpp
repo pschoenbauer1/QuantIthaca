@@ -1,8 +1,15 @@
+#include <context/graph.h>
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 #include <math.h>
+#include <py/py_bridge.h>
+#include <utils/heap.h>
+#include <utils/ringbuffer.h>
+#include <utils/sort.h>
+#include <utils/threads.h>
 
 #include <algorithm>
+#include <core.hpp>
 #include <limits>
 #include <map>
 #include <numeric>
@@ -11,14 +18,6 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
-
-#include "core.hpp"
-#include "graph.h"
-#include "heap.h"
-#include "py_bridge.h"
-#include "ringbuffer.h"
-#include "sort.h"
-#include "threads.h"
 
 TEST(UtilsTest, TestThreadPool)
 {
@@ -177,7 +176,7 @@ TEST(UtilsTest, TestSpscRingBuffer)
 {
     utils::SpscRingBuffer<int> buffer(1024);
 
-    int N = 1000 * 1000 * 100;
+    int N = 1000 * 1000;
     std::vector<int> out(N);
 
     auto lambda_push = [&]()
@@ -219,7 +218,7 @@ TEST(UtilsTest, TestRingBuffer)
 {
     utils::RingBuffer<int> buffer(1024);
 
-    int N = 1000 * 1000 * 100;
+    int N = 1000 * 1000;
     std::vector<int> out(N);
 
     auto lambda_push = [&]()

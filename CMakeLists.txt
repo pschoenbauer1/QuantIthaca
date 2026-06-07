@@ -61,20 +61,30 @@ FetchContent_Declare(
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build glog as static (see comment above)" FORCE)
 FetchContent_MakeAvailable(glog)
 
-add_subdirectory(cpp/src/context)
-add_subdirectory(cpp/src/utils)
+# add_subdirectory(cpp/src)
+# add_subdirectory(cpp/src/utils)
+
+# ------------------------ Core ------------------------
 
 add_library(core STATIC
   cpp/src/core.cpp
+  cpp/src/context/graph.cpp
+  cpp/src/context_obj/dummy_obj1.cpp
+  cpp/src/utils/threads.cpp
 )
-target_include_directories(core PUBLIC cpp/include)
-target_link_libraries(core PUBLIC utils context)
+target_include_directories(core PUBLIC cpp/include cpp/src)
+# target_link_libraries(core PUBLIC utils context)
+install(TARGETS core LIBRARY DESTINATION quantithaca)
 
-nanobind_add_module(core_bind cpp/src/bindings.cpp)
-target_link_libraries(core_bind PRIVATE core utils)
+# ------------------------ Nanobind ------------------------
+
+nanobind_add_module(core_bind cpp/src/py/bindings.cpp)
+target_include_directories(core_bind PUBLIC cpp/src)
+target_link_libraries(core_bind PRIVATE core)
 target_compile_definitions(core_bind PRIVATE PY_BRIDGE_USE_NANOBIND)
 
-install(TARGETS core LIBRARY DESTINATION quantithaca)
+
+# ------------------------ Test ------------------------
 
 include(CTest)
 if(BUILD_TESTING AND NOT SKBUILD)
@@ -102,7 +112,7 @@ if(BUILD_TESTING AND NOT SKBUILD)
     tests/cpp/test_utils.cpp
   )
   target_include_directories(core_tests PRIVATE cpp/src)
-  target_link_libraries(core_tests PRIVATE core utils GTest::gtest_main pybind11::embed)
+  target_link_libraries(core_tests PRIVATE core GTest::gtest_main pybind11::embed glog::glog)
   target_compile_definitions(core_tests PRIVATE PY_BRIDGE_USE_PYBIND)
 
   # Build-time gtest discovery executes core_tests.exe; on Windows it must find

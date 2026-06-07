@@ -1,14 +1,18 @@
 #pragma once
 
+#include <context/graph_value.h>
+
 #include <concepts>
 #include <string>
 #include <variant>
 
-#include "graph_value.h"
+namespace graph
+{
 
-namespace graph {
+class DummyValue1;
 
-struct DummyKey1 {
+struct DummyKey1
+{
     int idx = 1;
 
     using ValueType = DummyValue1;
@@ -18,7 +22,8 @@ struct DummyKey1 {
     auto operator<=>(const DummyKey1&) const = default;
 };
 
-struct DummyKey2 {
+struct DummyKey2
+{
     std::string str = "hello world";
 
     using ValueType = DummyValue2;
@@ -30,7 +35,8 @@ struct DummyKey2 {
 
 using GraphKey = std::variant<DummyKey1, DummyKey2>;
 
-inline std::string to_string(const GraphKey& key) {
+inline std::string to_string(const GraphKey& key)
+{
     return std::visit([](const auto& key_) { return key_.to_string(); }, key);
 }
 

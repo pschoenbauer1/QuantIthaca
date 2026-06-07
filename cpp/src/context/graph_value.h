@@ -1,91 +1,103 @@
 #pragma once
 
+#include <utils/pointers.h>
+#include <utils/threads.h>
+
 #include <concepts>
 #include <string>
+#include <variant>
 
-#include "pointers.h"
-#include "threads.h"
+namespace graph
+{
 
-namespace graph {
-
-class GraphValue {
-   public:
+class GraphValue
+{
+public:
+    virtual std::string type_name() const = 0;
     virtual ~GraphValue() = default;
 };
 
-class DummyValue1 : public GraphValue {
-    double _x;
-
-   public:
-    explicit DummyValue1(double x) : _x(x) {}
-
-    double get_x() const { return _x; }
-
-    static std::string name() { return "DummyValue1"; }
-};
-class DummyValue2 : public GraphValue {
+class DummyValue2 : public GraphValue
+{
     double _y;
 
-   public:
+public:
     explicit DummyValue2(double y) : _y(y) {}
 
     double get_y() const { return _y; }
 
     static std::string name() { return "DummyValue2"; }
+    std::string type_name() const override { return name(); }
 };
 
-enum class ValueState { initialized, invalidated, exception, value, deferred };
+enum class ValueState
+{
+    initialized,
+    invalidated,
+    exception,
+    value,
+    deferred
+};
 
-class ValueWrapper {
+class ValueWrapper
+{
     std::variant<std::monostate, CPtr<GraphValue>, std::exception_ptr> _data{};
     mutable utils::Mutex _mutex;
 
-    bool _is_empty() const {
-        utils::ReadLock lock(_mutex);
-        return std::holds_alternative<std::monostate>(_data);
-    }
+    bool _is_empty() const { return std::holds_alternative<std::monostate>(_data); }
     bool _has_value() const { return std::holds_alternative<CPtr<GraphValue>>(_data); }
 
     bool _has_error() const { return std::holds_alternative<std::exception_ptr>(_data); }
 
-    void _rethrow_if_error() const {
-        if (_has_error()) {
+    void _rethrow_if_error() const
+    {
+        if (_has_error())
+        {
             utils::ReadLock lock(_mutex);
             std::rethrow_exception(std::get<std::exception_ptr>(_data));
         }
     }
-    void _throw_if_empty() const {
-        if (_is_empty()) {
+    void _throw_if_empty() const
+    {
+        if (_is_empty())
+        {
             THROW << "Value is empty";
         }
     }
 
-    void _set_error(std::exception_ptr exc) {
-        if (!_is_empty()) {
+    void _set_error(std::exception_ptr exc)
+    {
+        if (!_is_empty())
+        {
             THROW << "Attempted to set an error on a non-empty value wrapper.";
         }
         _data = exc;
     }
-    void _set_value(CPtr<GraphValue> value) {
-        if (!_is_empty()) {
+    void _set_value(CPtr<GraphValue> value)
+    {
+        if (!_is_empty())
+        {
             THROW << "Attempted to set a value on a non-empty value wrapper.";
         }
         _data = std::move(value);
     }
 
-   public:
+public:
     // --- state checks ---
-    bool is_empty() const {
+    bool is_empty() const
+    {
         utils::ReadLock lock(_mutex);
         return _is_empty();
     }
 
-    bool has_value() const {
+    bool has_value() const
+    {
         utils::ReadLock lock(_mutex);
         return _has_value();
     }
 
-    bool has_error() const {
+    bool has_error() const
+    {
         utils::ReadLock lock(_mutex);
         return _has_error();
     }
@@ -95,7 +107,8 @@ class ValueWrapper {
     ValueWrapper(std::exception_ptr error) { set_error(error); }
 
     // --- accessors ---
-    CPtr<GraphValue> value() const {
+    CPtr<GraphValue> value() const
+    {
         utils::ReadLock lock(_mutex);
 
         rethrow_if_error();
@@ -106,20 +119,24 @@ class ValueWrapper {
 
     std::exception_ptr error() const { return std::get<std::exception_ptr>(_data); }
 
-    void rethrow_if_error() const {
+    void rethrow_if_error() const
+    {
         utils::ReadLock lock(_mutex);
         _rethrow_if_error();
     }
-    void throw_if_empty() const {
+    void throw_if_empty() const
+    {
         utils::ReadLock lock(_mutex);
         _throw_if_empty();
     }
 
-    void set_error(std::exception_ptr exc) {
+    void set_error(std::exception_ptr exc)
+    {
         utils::WriteLock lock(_mutex);
         _set_error(exc);
     }
-    void set_value(CPtr<GraphValue> value) {
+    void set_value(CPtr<GraphValue> value)
+    {
         utils::WriteLock lock(_mutex);
         _set_value(value);
     }
