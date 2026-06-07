@@ -15,8 +15,8 @@
 #include "core.hpp"
 #include "graph.h"
 #include "heap.h"
-#include "lockfree_buffer.h"
 #include "py_bridge.h"
+#include "ringbuffer.h"
 #include "sort.h"
 #include "threads.h"
 
@@ -175,9 +175,9 @@ TEST(TestOperations, TestDivision)
 
 TEST(UtilsTest, TestSpscRingBuffer)
 {
-    utils::SpscRingBuffer<int> buffer(1000);
+    utils::SpscRingBuffer<int> buffer(1024);
 
-    int N = 1000 * 1000;
+    int N = 1000 * 1000 * 100;
     std::vector<int> out(N);
 
     auto lambda_push = [&]()
@@ -195,11 +195,61 @@ TEST(UtilsTest, TestSpscRingBuffer)
         }
     };
 
+    const auto start = std::chrono::system_clock::now();
+
     std::jthread thread_push(lambda_push);
     std::jthread thread_pop(lambda_pop);
 
     thread_push.join();
     thread_pop.join();
+
+    const auto end = std::chrono::system_clock::now();
+
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    LOG(INFO) << "TestSpscRingBuffer: " << duration.count() << " us";
+
+    for (int i = 0; i < N; ++i)
+    {
+        EXPECT_EQ(out[i], i);
+    }
+}
+
+TEST(UtilsTest, TestRingBuffer)
+{
+    utils::RingBuffer<int> buffer(1024);
+
+    int N = 1000 * 1000 * 100;
+    std::vector<int> out(N);
+
+    auto lambda_push = [&]()
+    {
+        for (int i = 0; i < N; ++i)
+        {
+            while (!buffer.push(i));
+        }
+    };
+    auto lambda_pop = [&]()
+    {
+        for (int i = 0; i < N; ++i)
+        {
+            while (!buffer.pop(out[i]));
+        }
+    };
+
+    const auto start = std::chrono::system_clock::now();
+
+    std::jthread thread_push(lambda_push);
+    std::jthread thread_pop(lambda_pop);
+
+    thread_push.join();
+    thread_pop.join();
+
+    const auto end = std::chrono::system_clock::now();
+
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    LOG(INFO) << "TestRingBuffer: " << duration.count() << " us";
 
     for (int i = 0; i < N; ++i)
     {

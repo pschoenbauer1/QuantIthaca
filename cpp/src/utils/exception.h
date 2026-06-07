@@ -13,8 +13,15 @@ struct RuntimeErrorBuilderHelper
 
 class RuntimeErrorBuilder
 {
+    std::string message_;
+
 public:
-    RuntimeErrorBuilder() = default;
+    RuntimeErrorBuilder(const char* file, int line)
+    {
+        std::ostringstream oss;
+        oss << file << ":" << line << ": ";
+        message_ = oss.str();
+    }
 
     template <typename T>
     RuntimeErrorBuilder&& operator<<(T&& value) &&
@@ -44,22 +51,20 @@ public:
         }
         return std::runtime_error(message_);
     }
-
-private:
-    std::string message_;
 };
 
 void operator|(const RuntimeErrorBuilderHelper&, const RuntimeErrorBuilder& builder)
 {
-    throw builder;
+    throw static_cast<std::runtime_error>(builder);
 }
 
 }  // namespace
 
 // clang-format off
 
-#define THROW RuntimeErrorBuilderHelper{} | RuntimeErrorBuilder {}
-#define PS_EXPECT_THAT(condition) if(!(condition)) THROW 
+#define THROW RuntimeErrorBuilderHelper{} | RuntimeErrorBuilder(__FILE__, __LINE__)
+#define PS_EXPECT_THAT(condition) if(!(condition)) THROW << "Condition " #condition << " is violated. "
+
 
 template <typename T>
 concept ComparableToFloat = requires(T t)
