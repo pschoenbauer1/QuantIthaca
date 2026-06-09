@@ -11,6 +11,7 @@
 
 #include "core.hpp"
 #include "graph_builder_trampoline.h"
+#include "graph_py_factory.h"
 #include "py_bridge.h"
 
 namespace nb = nanobind;
@@ -111,6 +112,7 @@ NB_MODULE(core_bind, m)
     // Graph Builders
 
     nb::class_<graph::GraphBuilder, graph::PyGraphBuilder>(m, "GraphBuilder")
+        .def(nb::init<>())
         .def("key", &graph::GraphBuilder::key)
         .def("dependencies",
              [](const graph::GraphBuilder& builder) { return key_set_to_vector(builder.dependencies()); })
@@ -172,10 +174,5 @@ NB_MODULE(core_bind, m)
                  &graph::Graph::contains),
              "key"_a);
 
-    graph::register_py_builder_factory(
-        [](const std::string& value_type_name, const graph::GraphKey& key) -> CPtr<graph::GraphBuilder>
-        {
-            return py_bridge::call_python_class<CPtr<graph::GraphBuilder>>(
-                "graph.graph_obj_builders", value_type_name, key);
-        });
+    graph::install_py_builder_factory();
 }

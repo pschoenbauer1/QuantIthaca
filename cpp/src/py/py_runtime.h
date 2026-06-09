@@ -1,6 +1,5 @@
 #pragma once
 
-#include <nanobind/nanobind.h>
 #include <pybind11/embed.h>
 
 #include <cstdlib>
@@ -9,8 +8,9 @@
 #include <mutex>
 #include <string>
 
+#include "graph_py_factory.h"
+
 namespace py = pybind11;
-namespace nb = nanobind;
 
 namespace py_runtime
 {
@@ -95,14 +95,15 @@ inline void ensure_core_bind(const std::filesystem::path& repo_root)
                                const auto filename = path.filename().string();
                                if (filename.starts_with("core_bind") && path.extension() == k_ext)
                                {
-                                   sys_path.attr("insert")(0, path.parent().string());
+                                   sys_path.attr("insert")(0, path.parent_path().string());
                                    break;
                                }
                            }
                        }
 
-                       nb::gil_scoped_acquire gil{};
-                       nb::module_::import_("core_bind");
+                       py::gil_scoped_acquire gil{};
+                       py::module_::import("core_bind");
+                       graph::install_py_builder_factory();
                    });
 }
 

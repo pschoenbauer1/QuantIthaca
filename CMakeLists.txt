@@ -63,6 +63,7 @@ set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF)
 FetchContent_MakeAvailable(glog)
 set(BUILD_TESTING ON CACHE BOOL "" FORCE)
+set(BUILD_TESTING ON)
 
 # ------------------------ Core ------------------------
 
@@ -80,7 +81,7 @@ install(TARGETS core LIBRARY DESTINATION quantithaca)
 # ------------------------ Nanobind ------------------------
 
 
-nanobind_add_module(core_bind cpp/src/py/bindings.cpp)
+nanobind_add_module(core_bind cpp/src/py/bindings.cpp cpp/src/py/graph_py_factory.cpp)
 target_include_directories(core_bind PUBLIC cpp/src)
 target_link_libraries(core_bind PRIVATE core)
 target_compile_definitions(core_bind PRIVATE PY_BRIDGE_USE_NANOBIND)
@@ -113,16 +114,17 @@ if(BUILD_TESTING AND NOT SKBUILD)
     tests/cpp/test_core.cpp
     tests/cpp/test_graph.cpp
     tests/cpp/test_utils.cpp
+    cpp/src/py/graph_py_factory.cpp
   )
   target_include_directories(core_tests PRIVATE cpp/src)
   target_link_libraries(core_tests PRIVATE
     core
     GTest::gtest_main
     pybind11::embed
-    nanobind
     glog::glog
   )
-  target_compile_definitions(core_tests PRIVATE PY_BRIDGE_USE_NANOBIND PY_EMBED_PYTHON)
+  # Embedded gtests must call Python via pybind11 — nanobind does not support embedding.
+  target_compile_definitions(core_tests PRIVATE PY_BRIDGE_USE_PYBIND PY_EMBED_PYTHON)
   add_dependencies(core_tests core_bind)
 
   # Build-time gtest discovery executes core_tests.exe; on Windows it must find

@@ -166,7 +166,7 @@ public:
                 {
                     iter->second->set_error(std::current_exception());
                 }
-                for (const auto& dependent : _dependents.at(key))
+                for (const auto& dependent : _dependents[key])
                 {
                     unmet_dependencies[dependent]--;
                     if (unmet_dependencies[dependent] == 0)
@@ -254,3 +254,26 @@ void graph::Graph::GraphImpl::__init(const GraphKey& key)
     _map[key] = std::make_shared<ValueWrapper>();
     _nodes[key] = std::visit([](const auto& key_) { return make_builder(key_); }, key);
 };
+
+namespace graph
+{
+namespace
+{
+PyBuilderFactoryFn g_py_builder_factory;
+}
+
+void register_py_builder_factory(PyBuilderFactoryFn fn)
+{
+    g_py_builder_factory = std::move(fn);
+}
+
+CPtr<GraphBuilder> make_py_builder(const std::string& value_type_name, const GraphKey& key)
+{
+    if (!g_py_builder_factory)
+    {
+        THROW << "Python builder factory is not registered for " << value_type_name << ".";
+    }
+    return g_py_builder_factory(value_type_name, key);
+}
+
+}  // namespace graph

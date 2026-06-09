@@ -7,8 +7,6 @@
 
 #include <vector>
 
-#include <utils/exception.h>
-
 namespace nb = nanobind;
 
 namespace graph
@@ -16,30 +14,33 @@ namespace graph
 
 struct PyGraphBuilder : GraphBuilder
 {
-    NB_TRAMPOLINE(GraphBuilder, 1);
+    NB_TRAMPOLINE(GraphBuilder, 3);
 
-    GraphKey key() const override
-    {
-        if (nb::object self = nb::find(this))
-        {
-            nb::gil_scoped_acquire gil;
-            return nb::cast<GraphKey>(self.attr("key")());
-        }
-        THROW << "GraphBuilder::key() is not implemented.";
-    }
+    GraphKey key() const override { NB_OVERRIDE_PURE(key); }
 
     KeySet dependencies() const override
     {
-        if (nb::object self = nb::find(this))
+        nanobind::detail::ticket nb_ticket(nb_trampoline, "dependencies", true);
+        const nb::object deps = nb_trampoline.base().attr(nb_ticket.key)();
+        KeySet result;
+        for (nb::handle item : deps)
         {
-            nb::gil_scoped_acquire gil;
-            const auto vec = nb::cast<std::vector<GraphKey>>(self.attr("dependencies")());
-            return KeySet(vec.begin(), vec.end());
+            result.insert(nb::cast<GraphKey>(item));
         }
-        THROW << "GraphBuilder::dependencies() is not implemented.";
+        return result;
     }
 
-    CPtr<GraphValue> value(const Graph& graph) const override { NB_OVERRIDE(value, graph); }
+    CPtr<GraphValue> value(const Graph& graph) const override
+    {
+        nanobind::detail::ticket nb_ticket(nb_trampoline, "value", false);
+        if (nb_ticket.key.is_valid())
+        {
+            nb::object py_graph = nb::cast(&graph, nb::rv_policy::reference_internal);
+            return nb::cast<CPtr<GraphValue>>(
+                nb_trampoline.base().attr(nb_ticket.key)(py_graph));
+        }
+        return NBBase::value(graph);
+    }
 };
 
 }  // namespace graph

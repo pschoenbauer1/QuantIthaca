@@ -70,12 +70,19 @@ void merge_sort(std::vector<T>& vec, int begin, int end, std::vector<T>& workspa
     int ind1 = begin;
     int ind2 = mid;
 
-    for (int i = begin; i < end; ++i) {
-        if (ind2 >= end || (ind1 < mid && vec[ind1] <= vec[ind2])) {
-            workspace[i] = vec[ind1++];
+    int i = begin;
+    while (ind1 < mid && ind2 < end) {
+        if (vec[ind1] <= vec[ind2]) {
+            workspace[i++] = vec[ind1++];
         } else {
-            workspace[i] = vec[ind2++];
+            workspace[i++] = vec[ind2++];
         }
+    }
+    while (ind1 < mid) {
+        workspace[i++] = vec[ind1++];
+    }
+    while (ind2 < end) {
+        workspace[i++] = vec[ind2++];
     }
 
     std::copy(&workspace[begin], &workspace[end], &vec[begin]);

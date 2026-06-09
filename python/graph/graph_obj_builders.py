@@ -8,6 +8,7 @@ import core_bind as cb
 
 class DummyValuePy(cb.GraphBuilder):
     def __init__(self, key):
+        super().__init__()
         self._key = key
 
     def key(self):

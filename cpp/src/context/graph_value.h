@@ -156,24 +156,7 @@ CPtr<GraphBuilder> make_builder(const Key& key);
 using PyBuilderFactoryFn =
     std::function<CPtr<GraphBuilder>(const std::string& value_type_name, const GraphKey& key)>;
 
-inline PyBuilderFactoryFn& py_builder_factory()
-{
-    static PyBuilderFactoryFn factory;
-    return factory;
-}
-
-inline void register_py_builder_factory(PyBuilderFactoryFn fn)
-{
-    py_builder_factory() = std::move(fn);
-}
-
-inline CPtr<GraphBuilder> make_py_builder(const std::string& value_type_name, const GraphKey& key)
-{
-    if (!py_builder_factory())
-    {
-        THROW << "Python builder factory is not registered for " << value_type_name << ".";
-    }
-    return py_builder_factory()(value_type_name, key);
-}
+void register_py_builder_factory(PyBuilderFactoryFn fn);
+CPtr<GraphBuilder> make_py_builder(const std::string& value_type_name, const GraphKey& key);
 
 }  // namespace graph
