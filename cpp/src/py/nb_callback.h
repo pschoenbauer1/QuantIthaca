@@ -6,22 +6,72 @@
 #include <string>
 #include <utility>
 
+#if defined(PY_EMBED_PYTHON)
+#include "py_runtime.h"
+#endif
 
 namespace nb = nanobind;
 
-namespace callback {
+namespace callback
+{
+
+#if defined(PY_EMBED_PYTHON)
+inline void ensure_embedded_python()
+{
+    py_runtime::ensure_python_runtime();
+}
+#else
+inline void ensure_embedded_python() {}
+#endif
 
 template <typename ReturnT, typename... Args>
-inline ReturnT nb_callback(const std::string& py_function, Args&&... args) {
-    try {
-        nb::object mod = nb::module_::import_("cpp_callbacks");
+inline ReturnT nb_callback_module(const std::string& py_module,
+                                  const std::string& py_function,
+                                  Args&&... args)
+{
+    try
+    {
+        ensure_embedded_python();
+        nb::object mod = nb::module_::import_(py_module.c_str());
         nb::object func = mod.attr(py_function.c_str());
         nb::object result = func(std::forward<Args>(args)...);
         return nb::cast<ReturnT>(result);
-    } catch (const nb::python_error& e) {
-        // e.what() includes Python traceback text
+    }
+    catch (const nb::python_error& e)
+    {
         throw std::runtime_error(std::string("Python error: ") + e.what());
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e)
+    {
+        throw std::runtime_error(std::string("Error: ") + e.what());
+    }
+}
+
+template <typename ReturnT, typename... Args>
+inline ReturnT nb_callback(const std::string& py_function, Args&&... args)
+{
+    return nb_callback_module<ReturnT>("cpp_callbacks", py_function, std::forward<Args>(args)...);
+}
+
+template <typename ReturnT, typename... Args>
+inline ReturnT nb_callback_class(const std::string& py_module,
+                                 const std::string& class_name,
+                                 Args&&... args)
+{
+    try
+    {
+        ensure_embedded_python();
+        nb::object mod = nb::module_::import_(py_module.c_str());
+        nb::object cls = mod.attr(class_name.c_str());
+        nb::object result = cls(std::forward<Args>(args)...);
+        return nb::cast<ReturnT>(result);
+    }
+    catch (const nb::python_error& e)
+    {
+        throw std::runtime_error(std::string("Python error: ") + e.what());
+    }
+    catch (const std::exception& e)
+    {
         throw std::runtime_error(std::string("Error: ") + e.what());
     }
 }

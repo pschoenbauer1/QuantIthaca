@@ -59,24 +59,26 @@ FetchContent_Declare(
 # gtest_discover_tests runs core_tests.exe during the build — if glog.dll is not next to
 # the exe, load fails with 0xc0000135 (STATUS_DLL_NOT_FOUND). Static glog avoids that.
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build glog as static (see comment above)" FORCE)
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTING OFF)
 FetchContent_MakeAvailable(glog)
-
-# add_subdirectory(cpp/src)
-# add_subdirectory(cpp/src/utils)
+set(BUILD_TESTING ON CACHE BOOL "" FORCE)
 
 # ------------------------ Core ------------------------
+
 
 add_library(core STATIC
   cpp/src/core.cpp
   cpp/src/context/graph.cpp
-  cpp/src/context_obj/dummy_obj1.cpp
+  cpp/src/context_obj/dummy_obj.cpp
   cpp/src/utils/threads.cpp
 )
 target_include_directories(core PUBLIC cpp/include cpp/src)
-# target_link_libraries(core PUBLIC utils context)
 install(TARGETS core LIBRARY DESTINATION quantithaca)
 
+
 # ------------------------ Nanobind ------------------------
+
 
 nanobind_add_module(core_bind cpp/src/py/bindings.cpp)
 target_include_directories(core_bind PUBLIC cpp/src)
@@ -85,6 +87,7 @@ target_compile_definitions(core_bind PRIVATE PY_BRIDGE_USE_NANOBIND)
 
 
 # ------------------------ Test ------------------------
+
 
 include(CTest)
 if(BUILD_TESTING AND NOT SKBUILD)
@@ -112,8 +115,15 @@ if(BUILD_TESTING AND NOT SKBUILD)
     tests/cpp/test_utils.cpp
   )
   target_include_directories(core_tests PRIVATE cpp/src)
-  target_link_libraries(core_tests PRIVATE core GTest::gtest_main pybind11::embed glog::glog)
-  target_compile_definitions(core_tests PRIVATE PY_BRIDGE_USE_PYBIND)
+  target_link_libraries(core_tests PRIVATE
+    core
+    GTest::gtest_main
+    pybind11::embed
+    nanobind
+    glog::glog
+  )
+  target_compile_definitions(core_tests PRIVATE PY_BRIDGE_USE_NANOBIND PY_EMBED_PYTHON)
+  add_dependencies(core_tests core_bind)
 
   # Build-time gtest discovery executes core_tests.exe; on Windows it must find
   # python312.dll at process startup.

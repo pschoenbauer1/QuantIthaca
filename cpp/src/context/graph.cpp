@@ -1,9 +1,8 @@
 
 #include "graph.h"
 
-#include <context/graph_node.h>
 #include <context/graph_value.h>
-#include <context_obj/dummy_obj1.h>
+#include <context_obj/graph_key.h>
 #include <utils/containers.h>
 #include <utils/threads.h>
 
@@ -85,7 +84,7 @@ public:
         }
     }
 
-    CPtr<GraphValue> value(const GraphKey& key) const
+    CPtr<GraphValue> get_value(const GraphKey& key) const
     {
         utils::ReadLock lock(_mutex);
 
@@ -96,10 +95,27 @@ public:
         }
         return iter->second->value();
     }
-    bool contains(const GraphKey& key)
+    bool contains(const GraphKey& key) const
     {
         utils::ReadLock lock(_mutex);
         return __contains(key);
+    }
+
+    bool empty() const
+    {
+        utils::ReadLock lock(_mutex);
+        return _map.empty();
+    }
+
+    KeySet keys() const
+    {
+        utils::ReadLock lock(_mutex);
+        KeySet result;
+        for (const auto& key : std::views::keys(_map))
+        {
+            result.insert(key);
+        }
+        return result;
     }
 
     void set_value(const GraphKey& key, const CPtr<GraphValue>& value)
@@ -107,9 +123,6 @@ public:
         utils::ReadLock lock(_mutex);
         __set_value(key, value);
     };
-
-    template <KeyLike Key>
-    CPtr<GraphBuilder> create_node(const Key& key) const;
 
     void compute()
     {
@@ -180,23 +193,15 @@ graph::Graph::Graph(KeyMap<Ptr<ValueWrapper>> initial_map)
 {
 }
 
-CPtr<graph::GraphValue> graph::Graph::value(const GraphKey& key) const
+CPtr<graph::GraphValue> graph::Graph::get_value(const GraphKey& key) const
 {
-    return _impl->value(key);
+    return _impl->get_value(key);
 }
 
 void graph::Graph::insert(const GraphKey& key, CPtr<GraphValue> value)
 {
-    const auto lambda = [&]<typename Key>(const Key& k)
-    {
-        using value_type = Key::ValueType;
-        auto value_ = std::dynamic_pointer_cast<const value_type>(value);
-        PS_EXPECT_THAT(!!value_) << "Error in 'Graph::insert': Value Type " << value->type_name()
-                                 << ", but Key " << Key::name() << " requires "
-                                 << value_type::name();
-    };
-    std::visit(lambda, key);
-    return _impl->insert(key, value);
+    _impl->init(key);
+    set_value(key, value);
 }
 
 void graph::Graph::insert(const GraphKey& key)
@@ -208,18 +213,36 @@ void graph::Graph::insert(const KeySet& key)
     _impl->init(key);
 }
 
-// ------------------------- GraphBuilders -------------------------
-
-template <>
-CPtr<graph::GraphBuilder> graph::Graph::GraphImpl::create_node(const DummyKey1& key) const
+void graph::Graph::set_value(const GraphKey& key, CPtr<GraphValue> value)
 {
-    return std::make_shared<DummyGraphBuilder1>(key);
+    const auto lambda = [&]<typename Key>(const Key&)
+    {
+        PS_EXPECT_THAT(value->type_name() == Key::value_type_name())
+            << "Error in 'Graph::set_value': Value Type " << value->type_name() << ", but Key "
+            << Key::name() << " requires " << Key::value_type_name() << ".";
+    };
+    std::visit(lambda, key);
+    _impl->set_value(key, value);
 }
 
-template <>
-CPtr<graph::GraphBuilder> graph::Graph::GraphImpl::create_node(const DummyKey2& key) const
+void graph::Graph::compute()
 {
-    return std::make_shared<DummyGraphBuilder2>(key);
+    _impl->compute();
+}
+
+bool graph::Graph::empty() const
+{
+    return _impl->empty();
+}
+
+graph::KeySet graph::Graph::keys() const
+{
+    return _impl->keys();
+}
+
+bool graph::Graph::contains(const GraphKey& key) const
+{
+    return _impl->contains(key);
 }
 
 void graph::Graph::GraphImpl::__init(const GraphKey& key)
@@ -229,9 +252,5 @@ void graph::Graph::GraphImpl::__init(const GraphKey& key)
         THROW << "Key " << to_string(key) << " already set.";
     }
     _map[key] = std::make_shared<ValueWrapper>();
-    _nodes[key] = std::visit([this](const auto& key_) { return this->create_node(key_); }, key);
+    _nodes[key] = std::visit([](const auto& key_) { return make_builder(key_); }, key);
 };
-
-// ------------------------- Dummy GraphBuilderes -------------------------
-
-graph::DummyGraphBuilder2::DummyGraphBuilder2(const DummyKey2& key) : _key(key) {}

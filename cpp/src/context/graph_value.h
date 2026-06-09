@@ -1,14 +1,21 @@
 #pragma once
 
+#include <context_obj/graph_key.h>
 #include <utils/pointers.h>
 #include <utils/threads.h>
 
+#include <utils/exception.h>
+
 #include <concepts>
+#include <functional>
 #include <string>
+#include <utility>
 #include <variant>
 
 namespace graph
 {
+
+class Graph;
 
 class GraphValue
 {
@@ -17,27 +24,14 @@ public:
     virtual ~GraphValue() = default;
 };
 
-class DummyValue2 : public GraphValue
-{
-    double _y;
-
-public:
-    explicit DummyValue2(double y) : _y(y) {}
-
-    double get_y() const { return _y; }
-
-    static std::string name() { return "DummyValue2"; }
-    std::string type_name() const override { return name(); }
-};
-
-enum class ValueState
-{
-    initialized,
-    invalidated,
-    exception,
-    value,
-    deferred
-};
+// enum class ValueState
+// {
+//     initialized,
+//     invalidated,
+//     exception,
+//     value,
+//     deferred
+// };
 
 class ValueWrapper
 {
@@ -141,4 +135,45 @@ public:
         _set_value(value);
     }
 };
+
+class GraphBuilder
+{
+public:
+    virtual ~GraphBuilder() = default;
+
+    virtual GraphKey key() const = 0;
+    virtual KeySet dependencies() const = 0;
+    virtual CPtr<GraphValue> value(const Graph& graph) const
+    {
+        THROW << "This node does not implement a 'value' function. This is a data node.";
+        return nullptr;
+    }
+};
+
+template <typename Key>
+CPtr<GraphBuilder> make_builder(const Key& key);
+
+using PyBuilderFactoryFn =
+    std::function<CPtr<GraphBuilder>(const std::string& value_type_name, const GraphKey& key)>;
+
+inline PyBuilderFactoryFn& py_builder_factory()
+{
+    static PyBuilderFactoryFn factory;
+    return factory;
+}
+
+inline void register_py_builder_factory(PyBuilderFactoryFn fn)
+{
+    py_builder_factory() = std::move(fn);
+}
+
+inline CPtr<GraphBuilder> make_py_builder(const std::string& value_type_name, const GraphKey& key)
+{
+    if (!py_builder_factory())
+    {
+        THROW << "Python builder factory is not registered for " << value_type_name << ".";
+    }
+    return py_builder_factory()(value_type_name, key);
+}
+
 }  // namespace graph

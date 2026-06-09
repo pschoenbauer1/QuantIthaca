@@ -24,4 +24,28 @@ ReturnT call_python(const std::string& py_function, Args&&... args)
 #endif
 }
 
+template <typename ReturnT, typename... Args>
+ReturnT call_python_module(const std::string& py_module,
+                           const std::string& py_function,
+                           Args&&... args)
+{
+#if defined(PY_BRIDGE_USE_NANOBIND)
+    return callback::nb_callback_module<ReturnT>(py_module, py_function, std::forward<Args>(args)...);
+#else
+    return py_calls::py_call_module<ReturnT>(py_module, py_function, std::forward<Args>(args)...);
+#endif
+}
+
+template <typename ReturnT, typename... Args>
+ReturnT call_python_class(const std::string& py_module,
+                          const std::string& class_name,
+                          Args&&... args)
+{
+#if defined(PY_BRIDGE_USE_NANOBIND)
+    return callback::nb_callback_class<ReturnT>(py_module, class_name, std::forward<Args>(args)...);
+#else
+    return py_calls::py_call_class<ReturnT>(py_module, class_name, std::forward<Args>(args)...);
+#endif
+}
+
 }  // namespace py_bridge
