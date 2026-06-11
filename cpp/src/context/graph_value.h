@@ -159,4 +159,9 @@ using PyBuilderFactoryFn =
 void register_py_builder_factory(PyBuilderFactoryFn fn);
 CPtr<GraphBuilder> make_py_builder(const std::string& value_type_name, const GraphKey& key);
 
+inline std::string py_builder_class_name(const std::string& value_type_name)
+{
+    return value_type_name + "Builder";
+}
+
 }  // namespace graph

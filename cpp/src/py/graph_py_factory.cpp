@@ -156,7 +156,7 @@ CPtr<GraphBuilder> make_embedded_python_builder(const std::string& value_type_na
 {
     py::gil_scoped_acquire gil;
     py::module_ builders = py::module_::import("graph.graph_obj_builders");
-    py::object cls = builders.attr(value_type_name.c_str());
+    py::object cls = builders.attr(py_builder_class_name(value_type_name).c_str());
     py::object inst = cls(graph_key_to_python(key));
     return std::make_shared<PyGraphBuilderEmbed>(std::move(inst));
 }
@@ -220,7 +220,7 @@ CPtr<GraphBuilder> make_nanobind_python_builder(const std::string& value_type_na
                                               const GraphKey& key)
 {
     nb::object mod = nb::module_::import_("graph.graph_obj_builders");
-    nb::object cls = mod.attr(value_type_name.c_str());
+    nb::object cls = mod.attr(py_builder_class_name(value_type_name).c_str());
     nb::object inst = cls(key);
     return std::make_shared<NbGraphBuilderHolder>(std::move(inst));
 }

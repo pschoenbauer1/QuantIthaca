@@ -1,12 +1,13 @@
 """Python GraphBuilder implementations.
 
-Each builder class is named after its value type (Key::value_type_name()).
+Each builder class is named Key::value_type_name() + "Builder"
+(e.g. DummyValuePyBuilder for DummyKeyPy).
 """
 
 import core_bind as cb
 
 
-class DummyValuePy(cb.GraphBuilder):
+class DummyValuePyBuilder(cb.GraphBuilder):
     def __init__(self, key):
         super().__init__()
         self._key = key

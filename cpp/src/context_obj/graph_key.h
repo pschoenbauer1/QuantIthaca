@@ -85,7 +85,7 @@ struct DummyKey5
     auto operator<=>(const DummyKey5&) const = default;
 };
 
-// Python-backed node: builder class DummyValuePy in graph.graph_obj_builders
+// Python-backed node: builder class DummyValuePyBuilder in graph.graph_obj_builders
 struct DummyKeyPy
 {
     int x = 1;
