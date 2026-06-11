@@ -1,5 +1,6 @@
 #include <context/graph.h>
 #include <context_obj/dummy_obj.h>
+#include <context_obj/py_obj.h>
 #include <gtest/gtest.h>
 #include <py/py_runtime.h>
 
@@ -97,6 +98,31 @@ TEST(GraphTest, ComputesDummyPyNode)
 
     EXPECT_TRUE(graph.contains(key));
     EXPECT_DOUBLE_EQ(graph.get_value(key)->value(), 2.5);
+}
+
+TEST(GraphTest, ComputesPyKeyNode)
+{
+    py_runtime::ensure_core_bind();
+
+    const graph::PyKey key{.id = "ratio"};
+    graph::Graph graph;
+
+    graph.insert(key);
+    graph.compute();
+
+    EXPECT_TRUE(graph.contains(key));
+    EXPECT_EQ(graph.get_value(key)->type_name(), "StringPyValue");
+}
+
+TEST(GraphTest, InsertPyKeyWithCppPyValue)
+{
+    const graph::PyKey key{.id = "leaf"};
+    graph::Graph graph;
+
+    graph.insert(key, std::make_shared<graph::PyValue>());
+    graph.compute();
+
+    EXPECT_EQ(graph.get_value(key)->type_name(), "PyValue");
 }
 
 TEST(GraphTest, ComputesPricingPipeline)

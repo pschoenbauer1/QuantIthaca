@@ -4,6 +4,7 @@
 #include <context/graph_value.h>
 #include <context_obj/dummy_obj.h>
 #include <context_obj/graph_key.h>
+#include <context_obj/py_obj.h>
 #include <py/py_bridge.h>
 
 #if defined(PY_BRIDGE_USE_PYBIND)
@@ -49,6 +50,10 @@ py::object graph_key_to_python(const GraphKey& key)
             {
                 return cb.attr("DummyKeyPy")(k.x, k.y);
             }
+            else if constexpr (std::is_same_v<Key, PyKey>)
+            {
+                return cb.attr("PyKey")(k.id);
+            }
         },
         key);
 }
@@ -83,6 +88,10 @@ GraphKey python_to_graph_key(const py::object& key)
         return GraphKey(
             DummyKeyPy{.x = key.attr("x").cast<int>(), .y = key.attr("y").cast<int>()});
     }
+    if (cls == "PyKey")
+    {
+        return GraphKey(PyKey{.id = key.attr("id").cast<std::string>()});
+    }
     THROW << "Unsupported Python graph key type: " << cls;
 }
 
@@ -112,6 +121,10 @@ CPtr<GraphValue> python_to_graph_value(const py::object& value)
     if (type_name == "DummyValuePy")
     {
         return std::make_shared<DummyValuePy>(value.attr("value")().cast<double>());
+    }
+    if (py::isinstance<PyValue>(value))
+    {
+        return py::cast<std::shared_ptr<PyValue>>(value);
     }
     THROW << "Unsupported Python graph value type: " << type_name;
 }

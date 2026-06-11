@@ -3,6 +3,7 @@
 
 #include <context/graph_value.h>
 #include <context_obj/graph_key.h>
+#include <context_obj/py_obj.h>
 #include <utils/containers.h>
 #include <utils/threads.h>
 
@@ -217,9 +218,18 @@ void graph::Graph::set_value(const GraphKey& key, CPtr<GraphValue> value)
 {
     const auto lambda = [&]<typename Key>(const Key&)
     {
-        PS_EXPECT_THAT(value->type_name() == Key::value_type_name())
-            << "Error in 'Graph::set_value': Value Type " << value->type_name() << ", but Key "
-            << Key::name() << " requires " << Key::value_type_name() << ".";
+        if constexpr (std::is_same_v<Key, PyKey>)
+        {
+            PS_EXPECT_THAT(std::dynamic_pointer_cast<const PyValue>(value))
+                << "Error in 'Graph::set_value': Key " << Key::name() << " requires "
+                << Key::value_type_name() << ".";
+        }
+        else
+        {
+            PS_EXPECT_THAT(value->type_name() == Key::value_type_name())
+                << "Error in 'Graph::set_value': Value Type " << value->type_name() << ", but Key "
+                << Key::name() << " requires " << Key::value_type_name() << ".";
+        }
     };
     std::visit(lambda, key);
     _impl->set_value(key, value);

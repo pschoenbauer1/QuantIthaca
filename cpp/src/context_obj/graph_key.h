@@ -17,6 +17,7 @@ class DummyValue3;
 class DummyValue4;
 class DummyValue5;
 class DummyValuePy;
+class PyValue;
 
 // 1. Raw market price (leaf input)
 struct DummyKey1
@@ -99,8 +100,21 @@ struct DummyKeyPy
     auto operator<=>(const DummyKeyPy&) const = default;
 };
 
+// Python-extensible value: builder class PyValueBuilder in graph.graph_obj_builders
+struct PyKey
+{
+    std::string id = "node";
+
+    using ValueType = PyValue;
+    static std::string name() { return "PyKey"; }
+    static std::string value_type_name() { return "PyValue"; }
+    std::string to_string() const { return "py_value:" + id; }
+    auto to_tuple() const { return std::make_tuple(id); }
+    auto operator<=>(const PyKey&) const = default;
+};
+
 using GraphKey =
-    std::variant<DummyKey1, DummyKey2, DummyKey3, DummyKey4, DummyKey5, DummyKeyPy>;
+    std::variant<DummyKey1, DummyKey2, DummyKey3, DummyKey4, DummyKey5, DummyKeyPy, PyKey>;
 
 template <typename T>
 using KeyMap = std::unordered_map<GraphKey, T, utils::TupleHash>;

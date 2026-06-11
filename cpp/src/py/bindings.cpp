@@ -12,6 +12,7 @@
 #include "core.hpp"
 #include "graph_builder_trampoline.h"
 #include "graph_py_factory.h"
+#include "graph_value_trampoline.h"
 #include "py_bridge.h"
 
 namespace nb = nanobind;
@@ -80,10 +81,20 @@ NB_MODULE(core_bind, m)
         .def_rw("y", &graph::DummyKeyPy::y)
         .def("__repr__", [](const graph::DummyKeyPy& key) { return key.to_string(); });
 
+    nb::class_<graph::PyKey>(m, "PyKey")
+        .def(nb::init<>())
+        .def(nb::init<std::string>(), "id"_a)
+        .def_rw("id", &graph::PyKey::id)
+        .def("__repr__", [](const graph::PyKey& key) { return key.to_string(); });
+
     // Graph Values
 
     nb::class_<graph::GraphValue>(m, "GraphValue")
         .def("type_name", &graph::GraphValue::type_name);
+
+    nb::class_<graph::PyValue, graph::PyGraphValue, graph::GraphValue>(m, "PyValue")
+        .def(nb::init<>())
+        .def("type_name", &graph::PyValue::type_name);
 
     nb::class_<graph::DummyValue1, graph::GraphValue>(m, "DummyValue1")
         .def(nb::init<double>(), "price"_a)
@@ -139,6 +150,7 @@ NB_MODULE(core_bind, m)
     m.def("make_builder", [](const graph::DummyKey4& key) { return graph::make_builder(key); }, "key"_a);
     m.def("make_builder", [](const graph::DummyKey5& key) { return graph::make_builder(key); }, "key"_a);
     m.def("make_builder", [](const graph::DummyKeyPy& key) { return graph::make_builder(key); }, "key"_a);
+    m.def("make_builder", [](const graph::PyKey& key) { return graph::make_builder(key); }, "key"_a);
 
     // Graph
 

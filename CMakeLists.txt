@@ -72,6 +72,7 @@ add_library(core STATIC
   cpp/src/core.cpp
   cpp/src/context/graph.cpp
   cpp/src/context_obj/dummy_obj.cpp
+  cpp/src/context_obj/py_obj.cpp
   cpp/src/utils/threads.cpp
 )
 target_include_directories(core PUBLIC cpp/include cpp/src)
