@@ -89,8 +89,7 @@ NB_MODULE(core_bind, m)
 
     // Graph Values
 
-    nb::class_<graph::GraphValue>(m, "GraphValue")
-        .def("type_name", &graph::GraphValue::type_name);
+    nb::class_<graph::GraphValue>(m, "GraphValue").def("type_name", &graph::GraphValue::type_name);
 
     nb::class_<graph::PyValue, graph::PyGraphValue, graph::GraphValue>(m, "PyValue")
         .def(nb::init<>())
@@ -122,12 +121,21 @@ NB_MODULE(core_bind, m)
 
     // Graph Builders
 
-    nb::class_<graph::GraphBuilder, graph::PyGraphBuilder>(m, "GraphBuilder")
-        .def(nb::init<>())
+    nb::class_<graph::GraphBuilder>(m, "GraphBuilder")
         .def("key", &graph::GraphBuilder::key)
-        .def("dependencies",
-             [](const graph::GraphBuilder& builder) { return key_set_to_vector(builder.dependencies()); })
+        .def("dependencies", [](const graph::GraphBuilder& builder)
+             { return key_set_to_vector(builder.dependencies()); })
         .def("value", &graph::GraphBuilder::value, "graph"_a);
+
+    nb::class_<graph::PythonGraphBuilder, graph::PyGraphBuilder, graph::GraphBuilder>(
+        m, "PythonGraphBuilder")
+        .def(nb::init<>())
+        .def("key", &graph::PythonGraphBuilder::key)
+        .def("dependencies", [](const graph::PythonGraphBuilder& builder)
+             { return key_set_to_vector(builder.dependencies()); })
+        .def("value", &graph::PythonGraphBuilder::value, "graph"_a);
+
+    m.def("is_python_builder", &graph::is_python_builder, "builder"_a);
 
     nb::class_<graph::DummyGraphBuilder1, graph::GraphBuilder>(m, "DummyGraphBuilder1")
         .def(nb::init<const graph::DummyKey1&>(), "key"_a);
@@ -144,13 +152,26 @@ NB_MODULE(core_bind, m)
     nb::class_<graph::DummyGraphBuilder5, graph::GraphBuilder>(m, "DummyGraphBuilder5")
         .def(nb::init<const graph::DummyKey5&>(), "key"_a);
 
-    m.def("make_builder", [](const graph::DummyKey1& key) { return graph::make_builder(key); }, "key"_a);
-    m.def("make_builder", [](const graph::DummyKey2& key) { return graph::make_builder(key); }, "key"_a);
-    m.def("make_builder", [](const graph::DummyKey3& key) { return graph::make_builder(key); }, "key"_a);
-    m.def("make_builder", [](const graph::DummyKey4& key) { return graph::make_builder(key); }, "key"_a);
-    m.def("make_builder", [](const graph::DummyKey5& key) { return graph::make_builder(key); }, "key"_a);
-    m.def("make_builder", [](const graph::DummyKeyPy& key) { return graph::make_builder(key); }, "key"_a);
-    m.def("make_builder", [](const graph::PyKey& key) { return graph::make_builder(key); }, "key"_a);
+    m.def(
+        "make_builder", [](const graph::DummyKey1& key) { return graph::make_builder(key); },
+        "key"_a);
+    m.def(
+        "make_builder", [](const graph::DummyKey2& key) { return graph::make_builder(key); },
+        "key"_a);
+    m.def(
+        "make_builder", [](const graph::DummyKey3& key) { return graph::make_builder(key); },
+        "key"_a);
+    m.def(
+        "make_builder", [](const graph::DummyKey4& key) { return graph::make_builder(key); },
+        "key"_a);
+    m.def(
+        "make_builder", [](const graph::DummyKey5& key) { return graph::make_builder(key); },
+        "key"_a);
+    m.def(
+        "make_builder", [](const graph::DummyKeyPy& key) { return graph::make_builder(key); },
+        "key"_a);
+    m.def(
+        "make_builder", [](const graph::PyKey& key) { return graph::make_builder(key); }, "key"_a);
 
     // Graph
 
@@ -163,20 +184,20 @@ NB_MODULE(core_bind, m)
         .def("insert",
              nb::overload_cast<const graph::GraphKey&, CPtr<graph::GraphValue>>(
                  &graph::Graph::insert),
-             "key"_a,
-             "value"_a)
+             "key"_a, "value"_a)
         .def("insert", nb::overload_cast<const graph::GraphKey&>(&graph::Graph::insert), "key"_a)
-        .def("insert",
-             [](graph::Graph& graph, const std::vector<graph::GraphKey>& keys)
-             {
-                 graph::KeySet key_set;
-                 for (const auto& key : keys)
-                 {
-                     key_set.insert(key);
-                 }
-                 graph.insert(key_set);
-             },
-             "keys"_a)
+        .def(
+            "insert",
+            [](graph::Graph& graph, const std::vector<graph::GraphKey>& keys)
+            {
+                graph::KeySet key_set;
+                for (const auto& key : keys)
+                {
+                    key_set.insert(key);
+                }
+                graph.insert(key_set);
+            },
+            "keys"_a)
         .def("set_value", &graph::Graph::set_value, "key"_a, "value"_a)
         .def("compute", &graph::Graph::compute)
         .def("empty", &graph::Graph::empty)
@@ -184,7 +205,12 @@ NB_MODULE(core_bind, m)
         .def("contains",
              static_cast<bool (graph::Graph::*)(const graph::GraphKey&) const>(
                  &graph::Graph::contains),
+             "key"_a)
+        .def("is_empty",
+             static_cast<bool (graph::Graph::*)(const graph::GraphKey&) const>(
+                 &graph::Graph::is_empty),
              "key"_a);
 
     graph::install_py_builder_factory();
+    graph::install_py_batch_compute();
 }

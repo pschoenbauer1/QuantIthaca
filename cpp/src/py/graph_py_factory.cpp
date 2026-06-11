@@ -9,6 +9,7 @@
 
 #if defined(PY_BRIDGE_USE_PYBIND)
 #include <pybind11/embed.h>
+#include <pybind11/stl.h>
 
 #include <vector>
 
@@ -95,8 +96,42 @@ GraphKey python_to_graph_key(const py::object& key)
     THROW << "Unsupported Python graph key type: " << cls;
 }
 
+class EmbeddedPyValue : public PyValue
+{
+    py::object _self;
+
+public:
+    explicit EmbeddedPyValue(py::object self) : _self(std::move(self)) {}
+
+    std::string type_name() const override
+    {
+        py::gil_scoped_acquire gil;
+        return _self.attr("type_name")().cast<std::string>();
+    }
+};
+
+bool is_python_py_value(const py::object& value)
+{
+    py::module_ cb = py::module_::import("core_bind");
+    const py::object py_value_type = cb.attr("PyValue");
+    const py::object builtins = py::module_::import("builtins");
+    if (builtins.attr("isinstance")(value, py_value_type).cast<bool>())
+    {
+        return true;
+    }
+    const py::object value_type = value.attr("__class__");
+    return builtins.attr("issubclass")(value_type, py_value_type).cast<bool>();
+}
+
 CPtr<GraphValue> python_to_graph_value(const py::object& value)
 {
+    // PyValue and Python subclasses (e.g. StringPyValue) are nanobind types; hold the
+    // py object and delegate — pybind11 cannot cast them to C++ PyValue directly.
+    if (is_python_py_value(value))
+    {
+        return std::make_shared<EmbeddedPyValue>(value);
+    }
+
     const std::string type_name = value.attr("type_name")().cast<std::string>();
     if (type_name == "DummyValue1")
     {
@@ -122,14 +157,10 @@ CPtr<GraphValue> python_to_graph_value(const py::object& value)
     {
         return std::make_shared<DummyValuePy>(value.attr("value")().cast<double>());
     }
-    if (py::isinstance<PyValue>(value))
-    {
-        return py::cast<std::shared_ptr<PyValue>>(value);
-    }
     THROW << "Unsupported Python graph value type: " << type_name;
 }
 
-class PyGraphBuilderEmbed : public GraphBuilder
+class PyGraphBuilderEmbed : public PythonGraphBuilder
 {
     py::object _self;
 
@@ -174,11 +205,52 @@ CPtr<GraphBuilder> make_embedded_python_builder(const std::string& value_type_na
     return std::make_shared<PyGraphBuilderEmbed>(std::move(inst));
 }
 
+py::object borrow_graph_for_python(Graph& graph)
+{
+    static py::module_::module_def mod_def;
+    static py::module_ mod = []()
+    {
+        py::module_ m = py::module_::create_extension_module("graph._graph_embed", "", &mod_def);
+        py::class_<Graph>(m, "Graph")
+            .def("keys",
+                 [](const Graph& g)
+                 {
+                     py::list out;
+                     for (const auto& key : g.keys())
+                     {
+                         out.append(graph_key_to_python(key));
+                     }
+                     return out;
+                 })
+            .def("is_empty",
+                 [](const Graph& g, const py::object& key)
+                 { return g.is_empty(python_to_graph_key(key)); })
+            .def("set_value",
+                 [](Graph& g, const py::object& key, const py::object& value)
+                 { g.set_value(python_to_graph_key(key), python_to_graph_value(value)); });
+        py::module_::import("sys").attr("modules")["graph._graph_embed"] = m;
+        return m;
+    }();
+    (void)mod;
+    return py::cast(&graph, py::return_value_policy::reference);
+}
+
 }  // namespace
 
 void install_py_builder_factory()
 {
     register_py_builder_factory(make_embedded_python_builder);
+}
+
+void install_py_batch_compute()
+{
+    register_py_batch_compute_leaf_nodes(
+        [](Graph& graph)
+        {
+            py_bridge::call_python_module<void>("graph.batch_compute",
+                                                "batch_compute_leaf_python_nodes",
+                                                borrow_graph_for_python(graph));
+        });
 }
 
 }  // namespace graph
@@ -188,6 +260,7 @@ void install_py_builder_factory()
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/variant.h>
+#include <py/nb_callback.h>
 
 namespace nb = nanobind;
 
@@ -196,46 +269,13 @@ namespace graph
 namespace
 {
 
-class NbGraphBuilderHolder : public GraphBuilder
-{
-    nb::object _self;
-
-public:
-    explicit NbGraphBuilderHolder(nb::object self) : _self(std::move(self)) {}
-
-    GraphKey key() const override
-    {
-        nb::gil_scoped_acquire gil;
-        return nb::cast<GraphKey>(_self.attr("key")());
-    }
-
-    KeySet dependencies() const override
-    {
-        nb::gil_scoped_acquire gil;
-        const nb::object deps = _self.attr("dependencies")();
-        KeySet result;
-        for (nb::handle item : deps)
-        {
-            result.insert(nb::cast<GraphKey>(item));
-        }
-        return result;
-    }
-
-    CPtr<GraphValue> value(const Graph& graph) const override
-    {
-        nb::gil_scoped_acquire gil;
-        nb::object py_graph = nb::cast(&graph, nb::rv_policy::reference_internal);
-        return nb::cast<CPtr<GraphValue>>(_self.attr("value")(py_graph));
-    }
-};
-
 CPtr<GraphBuilder> make_nanobind_python_builder(const std::string& value_type_name,
                                               const GraphKey& key)
 {
     nb::object mod = nb::module_::import_("graph.graph_obj_builders");
     nb::object cls = mod.attr(py_builder_class_name(value_type_name).c_str());
     nb::object inst = cls(key);
-    return std::make_shared<NbGraphBuilderHolder>(std::move(inst));
+    return nb::cast<CPtr<GraphBuilder>>(inst);
 }
 
 }  // namespace
@@ -243,6 +283,18 @@ CPtr<GraphBuilder> make_nanobind_python_builder(const std::string& value_type_na
 void install_py_builder_factory()
 {
     register_py_builder_factory(make_nanobind_python_builder);
+}
+
+void install_py_batch_compute()
+{
+    register_py_batch_compute_leaf_nodes(
+        [](Graph& graph)
+        {
+            callback::nb_callback_module<void>(
+                "graph.batch_compute",
+                "batch_compute_leaf_python_nodes",
+                nb::cast(&graph, nb::rv_policy::reference));
+        });
 }
 
 }  // namespace graph

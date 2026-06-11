@@ -104,6 +104,7 @@ inline void ensure_core_bind(const std::filesystem::path& repo_root)
                        py::gil_scoped_acquire gil{};
                        py::module_::import("core_bind");
                        graph::install_py_builder_factory();
+                       graph::install_py_batch_compute();
                    });
 }
 

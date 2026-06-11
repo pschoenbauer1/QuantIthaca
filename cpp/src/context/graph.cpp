@@ -55,11 +55,7 @@ class graph::Graph::GraphImpl
     }
 
 public:
-    GraphImpl(Graph& graph,
-              std::unordered_map<GraphKey, Ptr<ValueWrapper>, utils::TupleHash>&& initial_map)
-        : _graph(graph), _map(std::move(initial_map))
-    {
-    }
+    explicit GraphImpl(Graph& graph) : _graph(graph) {}
 
     void init(const GraphKey& key)
     {
@@ -102,6 +98,17 @@ public:
         return __contains(key);
     }
 
+    bool is_empty(const GraphKey& key) const
+    {
+        utils::ReadLock lock(_mutex);
+        const auto iter = _map.find(key);
+        if (iter == _map.end())
+        {
+            THROW << "Key " << to_string(key) << " not found.";
+        }
+        return iter->second->is_empty();
+    }
+
     bool empty() const
     {
         utils::ReadLock lock(_mutex);
@@ -133,6 +140,8 @@ public:
             utils::WriteLock lock(_mutex);
             __forward_closure();
         }
+
+        batch_compute_python_leaf_nodes(_graph.get());
 
         KeyMap<int> unmet_dependencies{};
         std::vector<GraphKey> ready;
@@ -187,12 +196,7 @@ public:
     }
 };
 
-graph::Graph::Graph() : _impl(std::make_shared<GraphImpl>(*this, KeyMap<Ptr<ValueWrapper>>{})) {}
-
-graph::Graph::Graph(KeyMap<Ptr<ValueWrapper>> initial_map)
-    : _impl(std::make_shared<GraphImpl>(*this, std::move(initial_map)))
-{
-}
+graph::Graph::Graph() : _impl(std::make_shared<GraphImpl>(*this)) {}
 
 CPtr<graph::GraphValue> graph::Graph::get_value(const GraphKey& key) const
 {
@@ -255,6 +259,11 @@ bool graph::Graph::contains(const GraphKey& key) const
     return _impl->contains(key);
 }
 
+bool graph::Graph::is_empty(const GraphKey& key) const
+{
+    return _impl->is_empty(key);
+}
+
 void graph::Graph::GraphImpl::__init(const GraphKey& key)
 {
     if (__contains(key))
@@ -270,6 +279,7 @@ namespace graph
 namespace
 {
 PyBuilderFactoryFn g_py_builder_factory;
+PyBatchComputeLeafNodesFn g_py_batch_compute_leaf_nodes;
 }
 
 void register_py_builder_factory(PyBuilderFactoryFn fn)
@@ -284,6 +294,19 @@ CPtr<GraphBuilder> make_py_builder(const std::string& value_type_name, const Gra
         THROW << "Python builder factory is not registered for " << value_type_name << ".";
     }
     return g_py_builder_factory(value_type_name, key);
+}
+
+void register_py_batch_compute_leaf_nodes(PyBatchComputeLeafNodesFn fn)
+{
+    g_py_batch_compute_leaf_nodes = std::move(fn);
+}
+
+void batch_compute_python_leaf_nodes(Graph& graph)
+{
+    if (g_py_batch_compute_leaf_nodes)
+    {
+        g_py_batch_compute_leaf_nodes(graph);
+    }
 }
 
 }  // namespace graph

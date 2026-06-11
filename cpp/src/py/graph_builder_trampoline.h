@@ -12,9 +12,9 @@ namespace nb = nanobind;
 namespace graph
 {
 
-struct PyGraphBuilder : GraphBuilder
+struct PyGraphBuilder : PythonGraphBuilder
 {
-    NB_TRAMPOLINE(GraphBuilder, 3);
+    NB_TRAMPOLINE(PythonGraphBuilder, 3);
 
     GraphKey key() const override { NB_OVERRIDE_PURE(key); }
 

@@ -29,6 +29,7 @@ def test_py_key_computes_python_subclass_value():
 
 
 def test_py_key_accepts_python_subclass_on_insert():
+    print(cb)
     graph = cb.Graph()
     key = cb.PyKey("leaf")
 

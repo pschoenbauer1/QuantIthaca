@@ -1,5 +1,6 @@
 """Python GraphBuilder implementations.
 
+Subclass ``core_bind.PythonGraphBuilder`` (not ``GraphBuilder``).
 Each builder class is named Key::value_type_name() + "Builder"
 (e.g. DummyValuePyBuilder for DummyKeyPy).
 """
@@ -7,7 +8,7 @@ Each builder class is named Key::value_type_name() + "Builder"
 import core_bind as cb
 
 
-class DummyValuePyBuilder(cb.GraphBuilder):
+class DummyValuePyBuilder(cb.PythonGraphBuilder):
     def __init__(self, key):
         super().__init__()
         self._key = key
@@ -22,7 +23,7 @@ class DummyValuePyBuilder(cb.GraphBuilder):
         return cb.DummyValuePy(self._key.x / self._key.y)
 
 
-class PyValueBuilder(cb.GraphBuilder):
+class PyValueBuilder(cb.PythonGraphBuilder):
     def __init__(self, key):
         super().__init__()
         self._key = key

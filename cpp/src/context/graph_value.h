@@ -1,10 +1,9 @@
 #pragma once
 
 #include <context_obj/graph_key.h>
+#include <utils/exception.h>
 #include <utils/pointers.h>
 #include <utils/threads.h>
-
-#include <utils/exception.h>
 
 #include <concepts>
 #include <functional>
@@ -150,6 +149,19 @@ public:
     }
 };
 
+// Base for builders implemented in Python (see PyGraphBuilder trampoline in py/).
+// Must be concrete so nanobind can expose it as PythonGraphBuilder to Python.
+class PythonGraphBuilder : public GraphBuilder
+{
+public:
+    ~PythonGraphBuilder() override = default;
+};
+
+inline bool is_python_builder(const GraphBuilder& builder)
+{
+    return dynamic_cast<const PythonGraphBuilder*>(&builder) != nullptr;
+}
+
 template <typename Key>
 CPtr<GraphBuilder> make_builder(const Key& key);
 
@@ -158,6 +170,11 @@ using PyBuilderFactoryFn =
 
 void register_py_builder_factory(PyBuilderFactoryFn fn);
 CPtr<GraphBuilder> make_py_builder(const std::string& value_type_name, const GraphKey& key);
+
+using PyBatchComputeLeafNodesFn = std::function<void(Graph&)>;
+
+void register_py_batch_compute_leaf_nodes(PyBatchComputeLeafNodesFn fn);
+void batch_compute_python_leaf_nodes(Graph& graph);
 
 inline std::string py_builder_class_name(const std::string& value_type_name)
 {

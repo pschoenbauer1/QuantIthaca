@@ -129,14 +129,31 @@ if(BUILD_TESTING AND NOT SKBUILD)
   add_dependencies(core_tests core_bind)
 
   # Build-time gtest discovery executes core_tests.exe; on Windows it must find
-  # python312.dll at process startup.
+  # python312.dll (and its deps, e.g. zlib.dll) next to the exe — discovery runs
+  # with a minimal PATH, so copying is required (load fails with 0xc0000135 otherwise).
   if(WIN32 AND DEFINED Python_RUNTIME_LIBRARY_RELEASE)
+    get_filename_component(_python_runtime_dir "${Python_RUNTIME_LIBRARY_RELEASE}" DIRECTORY)
     add_custom_command(TARGET core_tests POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${Python_RUNTIME_LIBRARY_RELEASE}"
         "$<TARGET_FILE_DIR:core_tests>"
       VERBATIM
     )
+    if(EXISTS "${_python_runtime_dir}/zlib.dll")
+      add_custom_command(TARGET core_tests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          "${_python_runtime_dir}/zlib.dll"
+          "$<TARGET_FILE_DIR:core_tests>"
+        VERBATIM
+      )
+    elseif(EXISTS "${_python_runtime_dir}/Library/bin/zlib.dll")
+      add_custom_command(TARGET core_tests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          "${_python_runtime_dir}/Library/bin/zlib.dll"
+          "$<TARGET_FILE_DIR:core_tests>"
+        VERBATIM
+      )
+    endif()
   endif()
 
   include(GoogleTest)

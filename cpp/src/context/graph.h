@@ -31,7 +31,6 @@ class Graph
 
 public:
     Graph();
-    Graph(std::unordered_map<GraphKey, Ptr<ValueWrapper>, utils::TupleHash> map);
     Graph(Graph&&) = delete;
     Graph(const Graph&) = delete;
     Graph& operator=(const Graph&) = delete;
@@ -63,6 +62,7 @@ public:
     bool empty() const;
     KeySet keys() const;
     bool contains(const GraphKey& key) const;
+    bool is_empty(const GraphKey& key) const;
 
     template <KeyLike Key>
     bool contains(const Key& key) const
