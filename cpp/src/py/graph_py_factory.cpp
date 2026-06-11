@@ -86,8 +86,7 @@ GraphKey python_to_graph_key(const py::object& key)
     }
     if (cls == "DummyKeyPy")
     {
-        return GraphKey(
-            DummyKeyPy{.x = key.attr("x").cast<int>(), .y = key.attr("y").cast<int>()});
+        return GraphKey(DummyKeyPy{.x = key.attr("x").cast<int>(), .y = key.attr("y").cast<int>()});
     }
     if (cls == "PyKey")
     {
@@ -222,11 +221,9 @@ py::object borrow_graph_for_python(Graph& graph)
                      }
                      return out;
                  })
-            .def("is_empty",
-                 [](const Graph& g, const py::object& key)
+            .def("is_empty", [](const Graph& g, const py::object& key)
                  { return g.is_empty(python_to_graph_key(key)); })
-            .def("set_value",
-                 [](Graph& g, const py::object& key, const py::object& value)
+            .def("set_value", [](Graph& g, const py::object& key, const py::object& value)
                  { g.set_value(python_to_graph_key(key), python_to_graph_value(value)); });
         py::module_::import("sys").attr("modules")["graph._graph_embed"] = m;
         return m;
@@ -270,8 +267,15 @@ namespace graph
 namespace
 {
 
+bool is_nanobind_py_value(const nb::handle& value)
+{
+    const nb::object py_value_type = nb::module_::import_("core_bind").attr("PyValue");
+    return nb::cast<bool>(
+        nb::module_::import_("builtins").attr("isinstance")(value, py_value_type));
+}
+
 CPtr<GraphBuilder> make_nanobind_python_builder(const std::string& value_type_name,
-                                              const GraphKey& key)
+                                                const GraphKey& key)
 {
     nb::object mod = nb::module_::import_("graph.graph_obj_builders");
     nb::object cls = mod.attr(py_builder_class_name(value_type_name).c_str());
@@ -280,6 +284,15 @@ CPtr<GraphBuilder> make_nanobind_python_builder(const std::string& value_type_na
 }
 
 }  // namespace
+
+CPtr<GraphValue> nanobind_python_to_graph_value(nb::handle value)
+{
+    if (is_nanobind_py_value(value))
+    {
+        return nb::cast<CPtr<PyValue>>(value);
+    }
+    return nb::cast<CPtr<GraphValue>>(value);
+}
 
 void install_py_builder_factory()
 {
@@ -291,10 +304,9 @@ void install_py_batch_compute()
     register_py_batch_compute_leaf_nodes(
         [](Graph& graph)
         {
-            callback::nb_callback_module<void>(
-                "graph.batch_compute",
-                "batch_compute_leaf_python_nodes",
-                nb::cast(&graph, nb::rv_policy::reference));
+            callback::nb_callback_module<void>("graph.batch_compute",
+                                               "batch_compute_leaf_python_nodes",
+                                               nb::cast(&graph, nb::rv_policy::reference));
         });
 }
 

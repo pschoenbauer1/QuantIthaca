@@ -280,7 +280,7 @@ namespace
 {
 PyBuilderFactoryFn g_py_builder_factory;
 PyBatchComputeLeafNodesFn g_py_batch_compute_leaf_nodes;
-}
+}  // namespace
 
 void register_py_builder_factory(PyBuilderFactoryFn fn)
 {

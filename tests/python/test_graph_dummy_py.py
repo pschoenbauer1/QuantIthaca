@@ -4,6 +4,7 @@ import core_bind as cb
 
 
 def test_dummy_py_node_uses_python_builder():
+    print(cb)
     graph = cb.Graph()
     key = cb.DummyKeyPy(10, 4)
 

@@ -176,16 +176,18 @@ NB_MODULE(core_bind, m)
     // Graph
 
     nb::class_<graph::Graph>(m, "Graph")
-        .def(nb::init<>())
+        .def("__init__", [](graph::Graph* self) { new (self) graph::Graph(); })
         .def("get_value",
              static_cast<CPtr<graph::GraphValue> (graph::Graph::*)(const graph::GraphKey&) const>(
                  &graph::Graph::get_value),
              "key"_a)
-        .def("insert",
-             nb::overload_cast<const graph::GraphKey&, CPtr<graph::GraphValue>>(
-                 &graph::Graph::insert),
-             "key"_a, "value"_a)
         .def("insert", nb::overload_cast<const graph::GraphKey&>(&graph::Graph::insert), "key"_a)
+        .def(
+            "insert",
+            [](graph::Graph& graph, const graph::GraphKey& key, const nb::object& value)
+            { graph.insert(key, graph::nanobind_python_to_graph_value(value)); },
+            "key"_a,
+            "value"_a)
         .def(
             "insert",
             [](graph::Graph& graph, const std::vector<graph::GraphKey>& keys)
@@ -198,7 +200,12 @@ NB_MODULE(core_bind, m)
                 graph.insert(key_set);
             },
             "keys"_a)
-        .def("set_value", &graph::Graph::set_value, "key"_a, "value"_a)
+        .def(
+            "set_value",
+            [](graph::Graph& graph, const graph::GraphKey& key, const nb::object& value)
+            { graph.set_value(key, graph::nanobind_python_to_graph_value(value)); },
+            "key"_a,
+            "value"_a)
         .def("compute", &graph::Graph::compute)
         .def("empty", &graph::Graph::empty)
         .def("keys", [](const graph::Graph& graph) { return key_set_to_vector(graph.keys()); })
