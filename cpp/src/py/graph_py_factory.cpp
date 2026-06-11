@@ -258,6 +258,7 @@ void install_py_batch_compute()
 #else
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/variant.h>
 #include <py/nb_callback.h>
