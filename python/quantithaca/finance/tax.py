@@ -116,7 +116,7 @@ def compute_tax_aut(year:int):
     return {"pnl": pnl, "tax": tax}
 
 def tax_aut_write_pdf(year:int):
-    tables = compute_tax_aut(2024) 
+    tables = compute_tax_aut(year) 
 
     pnl = tables["pnl"]
     pnl = pnl[["account_name",
@@ -153,7 +153,7 @@ def tax_aut_write_pdf(year:int):
 
     pdf_tables.dataframes_to_pdf(
         tables_pdf, 
-        f"{TAX_DIRECTORY}/reports/tax_aut_2024.pdf",
+        f"{TAX_DIRECTORY}/reports/tax_aut_{year}.pdf",
         #landscape=True,
         section_column_specs=col_specs,
         #overwrite=True,
@@ -162,6 +162,6 @@ def tax_aut_write_pdf(year:int):
 
 
 if __name__ == "__main__":
-    #tax = tax_aut_write_pdf(2024) 
+    tax = tax_aut_write_pdf(2025) 
 
-     compute_pnl_uk(2025)   
+    # compute_pnl_uk(2025)   

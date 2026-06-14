@@ -42,7 +42,7 @@ public:
     CPtr<typename Key::ValueType> get_value(const Key& key) const
     {
         const auto& v = this->get_value(GraphKey(key));
-        auto v_casted = std::dynamic_pointer_cast<const Key::ValueType>(v);
+        auto v_casted = std::dynamic_pointer_cast<const typename Key::ValueType>(v);
         if (!v_casted)
         {
             THROW << "Error fetching " << key.to_string()

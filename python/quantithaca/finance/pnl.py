@@ -8,8 +8,11 @@ from quantithaca.db import neon_rw_engine, neon_ro_engine
 from quantithaca.sql_write import sql_write
 from quantithaca.logging import logger
 from quantithaca.utils import dateutils as du
+import dotenv
 
-TAX_DIRECTORY = r"C:\Users\phili\OneDrive\Steuererklaerungen"
+dotenv.load_dotenv()
+
+TAX_DIRECTORY = os.getenv("TAX_DIRECTORY") or r"C:\Users\phili\OneDrive\Steuererklaerungen"
 
 
 def read_pnl():
@@ -40,7 +43,7 @@ def write_pnl():
     data_old = data_old.set_index(key).sort_index()
     new_keys = data_new.index.difference(data_old.index)
     common_keys = data_new.index.intersection(data_old.index)
-    diff = data_new.loc[common_keys].compare(data_old.loc[common_keys])    
+    diff = data_new.loc[common_keys].compare(data_old.loc[common_keys])
     if not diff.empty:
         logger.warning(diff)
         raise ValueError("Stopping due to inconsistent data.")
@@ -52,7 +55,8 @@ def write_pnl():
         table="pnl",
         schema="finance",
         engine=neon_rw_engine,
-        flag="insert")
+        flag="insert",
+    )
 
 if __name__ == "__main__":
     write_pnl()

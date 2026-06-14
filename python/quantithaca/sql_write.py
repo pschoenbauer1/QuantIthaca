@@ -188,20 +188,6 @@ def sql_write(
     engine: Engine,
     flag: Literal["insert", "upsert"],
 ) -> None:
-    """
-    Write ``df`` to a PostgreSQL table using *engine*.
-
-    * Column names must match the table exactly (order follows the database).
-    * Missing values, NaT, NaN, and infinities are rejected.
-    * ``DATE`` / ``TIMESTAMP`` / ``TIMESTAMPTZ`` columns are converted to Python
-      ``date`` / ``datetime`` values. String cells use :func:`quantithaca.utils.dateutils.to_date`
-      and :func:`quantithaca.utils.dateutils.to_datetime` (formats ``d/m/Y``, ``d.m.Y``,
-      ``Y-m-d``, ``Ymd``). Timestamp strings that include a time or offset fall back to
-      :func:`pandas.to_datetime` (UTC) for ``TIMESTAMPTZ`` only.
-    * ``upsert`` uses ``ON CONFLICT`` on the primary key; non-key columns are
-      updated from the new row. If the table has only a primary key and no other
-      columns, conflicts are ignored (insert-or-skip).
-    """
     if engine.dialect.name != "postgresql":
         raise NotImplementedError("sql_write only supports PostgreSQL engines.")
     if pg_insert is None:  # pragma: no cover

@@ -1,0 +1,233 @@
+{
+    "counterparties": [
+        {
+            "counterparty_id": "allianz_elementar",
+            "counterparty_name": "Allianz Elementar Versicherungs-Aktiengesellschaft",
+            "accounts": [
+                {
+                    "iban": "AT801200051430305101",
+                    "bic": "BKAUATWWXXX",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": true
+                }
+            ],
+            "patterns": [
+                "Allianz\\s+Elementar"
+            ]
+        },
+        {
+            "counterparty_id": "weg_erdbergstrasse_8",
+            "counterparty_name": "WEG Erdbergstraße 8",
+            "accounts": [
+                {
+                    "iban": "AT412011128547884738",
+                    "bic": "GIBAATWWXXX",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": true
+                }
+            ],
+            "patterns": [
+                "(?:WEG|VK)\\s+Erdbergstra(?:ß|ss)e\\s*8"
+            ]
+        },
+        {
+            "counterparty_id": "weg_rennweg_70",
+            "counterparty_name": "WEG 1030 Wien, Rennweg 70",
+            "accounts": [
+                {
+                    "iban": "AT741200050787914949",
+                    "bic": "BKAUATWWXXX",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": true
+                }
+            ],
+            "patterns": [
+                "WEG\\s+1030\\s+Wien,\\s*Rennweg\\s*70"
+            ]
+        },
+        {
+            "counterparty_id": "paria_shahrestani",
+            "counterparty_name": "Paria Shahrestani",
+            "accounts": [
+                {
+                    "iban": "AT922011184440606900",
+                    "bic": "GIBAATWWXXX",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": true
+                }
+            ],
+            "patterns": [
+                "Paria\\s+Shahrestani"
+            ]
+        },
+        {
+            "counterparty_id": "brittany_tucker",
+            "counterparty_name": "Brittany Tucker",
+            "accounts": [
+                {
+                    "iban": null,
+                    "bic": "NTSBDEB1XXX",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": true
+                }
+            ],
+            "patterns": [
+                "Brittany\\s+Tucker"
+            ]
+        },
+        {
+            "counterparty_id": "juma_almohamad",
+            "counterparty_name": "Juma Almohamad Haifa Abdelrahman",
+            "accounts": [
+                {
+                    "iban": "AT112011184728958900",
+                    "bic": "GIBAATWWXXX",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": true
+                }
+            ],
+            "patterns": [
+                "Juma\\s+Almohamad"
+            ]
+        },
+        {
+            "counterparty_id": "johann_spiessberger",
+            "counterparty_name": "Johann Spiessberger",
+            "accounts": [
+                {
+                    "iban": "AT026000000006421418",
+                    "bic": "BAWAATWWXXX",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": true
+                }
+            ],
+            "patterns": [
+                "Johann\\s+Spiessberger"
+            ]
+        },
+        {
+            "counterparty_id": "pablo_montero",
+            "counterparty_name": "Pablo Montero de Hijes",
+            "accounts": [
+                {
+                    "iban": "AT041921080170694717",
+                    "bic": "SPBAATWWB99",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": true
+                },
+                {
+                    "iban": "ES4420800601393040049071",
+                    "bic": "CAGLESMMXXX",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": false
+                }
+            ],
+            "patterns": [
+                "Pablo\\s+Montero\\s+de\\s+Hijes",
+                "PABLO\\s+MONTERO\\s+DE\\s+HIJES"
+            ]
+        },
+        {
+            "counterparty_id": "kuebeckgasse_12",
+            "counterparty_name": "Kübeckgasse 12",
+            "accounts": [
+                {
+                    "iban": "AT103200000007617798",
+                    "bic": "RLNWATWWXXX",
+                    "valid_from": null,
+                    "valid_to": null,
+                    "is_primary": true
+                }
+            ],
+            "patterns": []
+        }
+    ],
+    "bu_rules": [
+        {
+            "bu": "Kuebeck13",
+            "patterns": [
+                "A564166830",
+                "K[uü]beckgasse\\s*12\\s*13",
+                "Mietzins\\s+Top\\s*13",
+                "Kuebeck13",
+                "Paria Shahrestani",
+                "Brittany Tucker"
+            ]
+        },
+        {
+            "bu": "Rennweg9",
+            "patterns": [
+                "A560545218",
+                "00370-0309-01",
+                "Rennweg\\s*70\\s*(?:/|\\s)?3\\s*(?:/|\\s)?9",
+                "Juma Almohamad Haifa Abdelrahman"
+            ]
+        },
+        {
+            "bu": "Erdberg36",
+            "patterns": [
+                "0113074\\d+",
+                "ERDB08\\s*740"
+            ]
+        },
+        {
+            "bu": "Erdberg47",
+            "patterns": [
+                "Miete\\s+Garagenplatz\\s+Nr\\.\\s*47",
+                "0113085\\d+",
+                "ERDB08\\s*850"
+            ]
+        },
+        {
+            "bu": "Erdberg48",
+            "patterns": [
+                "0113086\\d+",
+                "ERDB08\\s*860",
+                "Rent\\s+parking",
+                "Pablo Montero"
+            ]
+        }
+    ],
+    "category_rules": [
+        {
+            "category": "rent",
+            "patterns": [
+                "Miete\\s+Garagenplatz",
+                "Rent\\s+parking",
+                "RENT\\s+",
+                "Paria\\s+Shahrestani",
+                "Juma\\s+Almohamad",
+                "Johann\\s+Spiessberger",
+                "Pablo\\s+Montero",
+                "Brittany\\s+Tucker"
+            ]
+        },
+        {
+            "category": "utilities",
+            "patterns": [
+                "Vorschreibung",
+                "VORSCHR:",
+                "Mietzins\\s+Top\\s*13",
+                "(?:WEG|VK)\\s+Erdbergstra(?:ß|ss)e\\s*8",
+                "WEG\\s+1030\\s+Wien,\\s*Rennweg\\s*70"
+            ]
+        },
+        {
+            "category": "insurance",
+            "patterns": [
+                "Allianz\\s+Elementar",
+                "SEPA-Lastschrift\\s+A56\\d+"
+            ]
+        }
+    ],
+    "patterns_ignore": []
+}

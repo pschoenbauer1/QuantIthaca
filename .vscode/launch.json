@@ -3,18 +3,17 @@
     "configurations": [
         {
             "name": "(ctest) Launch",
-            "type": "cppvsdbg",
+            "type": "cppdbg",
             "request": "launch",
             "program": "${cmake.testProgram}",
-            "args": [
-                "${cmake.testArgs}"
-            ],
+            "args": "${cmake.testArgs}",
             "cwd": "${cmake.testWorkingDirectory}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "MIMode": "gdb"
         },
         {
             "name": "Python: Debug Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
