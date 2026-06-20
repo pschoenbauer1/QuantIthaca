@@ -1,4 +1,6 @@
-FROM mcr.microsoft.com/devcontainers/cpp:1-ubuntu-22.04
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+
+ARG NODE_VERSION=20
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
@@ -18,13 +20,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     valgrind \
     pkg-config \
     ccache \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/bin/fdfind /usr/local/bin/fd
+# RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
+#     && apt-get install -y nodejs \
+#     && npm install -g @anthropic-ai/claude-code \
+#     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -LsSf https://astral.sh/uv/install.sh \
-    | env UV_INSTALL_DIR=/usr/local/bin sh
-S
-RUN pip3 install --no-cache-dir \
-    black \
-    pytest
+USER vscode

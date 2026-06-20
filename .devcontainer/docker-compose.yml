@@ -1,0 +1,39 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - internal-only
+    environment:
+      HTTPS_PROXY: http://proxy:3128
+      HTTP_PROXY: http://proxy:3128
+      https_proxy: http://proxy:3128
+      http_proxy: http://proxy:3128
+      NO_PROXY: localhost,127.0.0.1
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+      DISABLE_AUTOUPDATER: "1"
+    volumes:
+      - ../workspace:/workspace:cached
+      - claude-code-config:/home/vscode/.claude
+    # Keeps the dev container alive for VS Code to attach to.
+    command: sleep infinity
+    depends_on:
+      - proxy
+
+  proxy:
+    image: ubuntu/squid:latest
+    networks:
+      - internal-only # so "app" can reach it
+      - external # the only container with a real route out
+    volumes:
+      - ./squid.conf:/etc/squid/squid.conf:ro
+    restart: unless-stopped
+
+networks:
+  internal-only:
+    internal: true # no default route to the internet - enforced by Docker itself
+  external:
+
+volumes:
+  claude-code-config:
