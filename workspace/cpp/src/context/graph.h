@@ -14,16 +14,6 @@
 namespace graph
 {
 
-template <typename T>
-concept KeyLike = requires(const T t) {
-    typename T::ValueType;
-
-    { T::name() } -> std::convertible_to<std::string>;
-    { t.to_string() } -> std::convertible_to<std::string>;
-    { T::value_type_name() } -> std::convertible_to<std::string>;
-    { t.to_tuple() };
-};
-
 class Graph
 {
     struct GraphImpl;
@@ -39,14 +29,15 @@ public:
     CPtr<GraphValue> get_value(const GraphKey& key) const;
 
     template <KeyLike Key>
-    CPtr<typename Key::ValueType> get_value(const Key& key) const
+    CPtr<typename Mapping<Key>::ValueType> get_value(const Key& key) const
     {
         const auto& v = this->get_value(GraphKey(key));
-        auto v_casted = std::dynamic_pointer_cast<const typename Key::ValueType>(v);
+        auto v_casted = std::dynamic_pointer_cast<const typename Mapping<Key>::ValueType>(v);
         if (!v_casted)
         {
             THROW << "Error fetching " << key.to_string()
-                  << ". Wrong ValueType was returned; expected " << Key::value_type_name() << ".";
+                  << ". Wrong ValueType was returned; expected "
+                  << Mapping<Key>::ValueType::name() << ".";
         }
         return v_casted;
     }

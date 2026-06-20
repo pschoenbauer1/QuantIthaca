@@ -1,6 +1,7 @@
 #pragma once
 
 #include <context/graph_value.h>
+#include <context_obj/key_model.h>
 
 #include <string>
 
@@ -29,3 +30,17 @@ public:
 };
 
 }  // namespace graph
+
+template <>
+struct graph::Mapping<graph::PyKey>
+{
+    using BuilderType = PyKeyGraphBuilder;
+    using ValueType   = PyValue;
+};
+
+// PyKey nodes hold arbitrary Python-defined values (PyValue subclasses).
+template <>
+inline bool graph::KeyModel<graph::PyKey>::allows_py_value_subclasses() const
+{
+    return true;
+}

@@ -12,42 +12,6 @@ namespace
 constexpr double k_price_markup = 1.05;
 }
 
-template <>
-CPtr<GraphBuilder> make_builder(const DummyKey1& key)
-{
-    return std::make_shared<DummyGraphBuilder1>(key);
-}
-
-template <>
-CPtr<GraphBuilder> make_builder(const DummyKey2& key)
-{
-    return std::make_shared<DummyGraphBuilder2>(key);
-}
-
-template <>
-CPtr<GraphBuilder> make_builder(const DummyKey3& key)
-{
-    return std::make_shared<DummyGraphBuilder3>(key);
-}
-
-template <>
-CPtr<GraphBuilder> make_builder(const DummyKey4& key)
-{
-    return std::make_shared<DummyGraphBuilder4>(key);
-}
-
-template <>
-CPtr<GraphBuilder> make_builder(const DummyKey5& key)
-{
-    return std::make_shared<DummyGraphBuilder5>(key);
-}
-
-template <>
-CPtr<GraphBuilder> make_builder(const DummyKeyPy& key)
-{
-    return make_py_builder(DummyKeyPy::value_type_name(), GraphKey(key));
-}
-
 DummyGraphBuilder1::DummyGraphBuilder1(const DummyKey1& key) : _key(key) {}
 
 DummyGraphBuilder2::DummyGraphBuilder2(const DummyKey2& key) : _key(key) {}
@@ -90,6 +54,11 @@ CPtr<GraphValue> DummyGraphBuilder5::value(const Graph& graph) const
     const auto benchmark = graph.get_value(DummyKey2{.index = _key.index});
     return std::make_shared<DummyValue5>(spread->spread() * adjusted->adjusted_price() /
                                          benchmark->rate());
+}
+
+CPtr<GraphValue> DummyKeyPyBuilder::value(const Graph& graph) const
+{
+    return make_py_builder(DummyValuePy::name(), GraphKey(_key))->value(graph);
 }
 
 }  // namespace graph

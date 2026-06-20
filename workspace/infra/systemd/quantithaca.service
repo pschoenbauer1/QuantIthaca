@@ -1,0 +1,13 @@
+[Unit]
+Description=QuantIthaca Streamlit App
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/workspace
+ExecStart=/workspace/scripts/streamlit.sh 10000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

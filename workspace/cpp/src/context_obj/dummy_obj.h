@@ -145,4 +145,57 @@ public:
     std::string type_name() const override { return name(); }
 };
 
+class DummyKeyPyBuilder : public GraphBuilder
+{
+    DummyKeyPy _key;
+
+public:
+    explicit DummyKeyPyBuilder(const DummyKeyPy& key) : _key(key) {}
+    GraphKey key() const override { return _key; }
+    KeySet dependencies() const override { return {}; }
+    CPtr<GraphValue> value(const Graph& graph) const override;
+};
+
 }  // namespace graph
+
+template <>
+struct graph::Mapping<graph::DummyKey1>
+{
+    using BuilderType = DummyGraphBuilder1;
+    using ValueType   = DummyValue1;
+};
+
+template <>
+struct graph::Mapping<graph::DummyKey2>
+{
+    using BuilderType = DummyGraphBuilder2;
+    using ValueType   = DummyValue2;
+};
+
+template <>
+struct graph::Mapping<graph::DummyKey3>
+{
+    using BuilderType = DummyGraphBuilder3;
+    using ValueType   = DummyValue3;
+};
+
+template <>
+struct graph::Mapping<graph::DummyKey4>
+{
+    using BuilderType = DummyGraphBuilder4;
+    using ValueType   = DummyValue4;
+};
+
+template <>
+struct graph::Mapping<graph::DummyKey5>
+{
+    using BuilderType = DummyGraphBuilder5;
+    using ValueType   = DummyValue5;
+};
+
+template <>
+struct graph::Mapping<graph::DummyKeyPy>
+{
+    using BuilderType = DummyKeyPyBuilder;
+    using ValueType   = DummyValuePy;
+};

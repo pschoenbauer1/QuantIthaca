@@ -1,12 +1,15 @@
 #include <context/graph.h>
 #include <context_obj/dummy_obj.h>
 #include <context_obj/graph_key.h>
+#include <context_obj/key_model.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
-#include <nanobind/stl/variant.h>
 #include <nanobind/stl/vector.h>
+#include <py/graph_key_caster.h>
+#include <py/graph_py_factory.h>
 
+#include <typeindex>
 #include <vector>
 
 #include "core.hpp"
@@ -40,25 +43,52 @@ NB_MODULE(core_bind, m)
           { return py_bridge::call_python<std::string>(py_func, arg); });
     m.def("graph_key_to_string", &graph::to_string, "key"_a);
 
-    // Graph Keys
+    // Graph Keys — each binding is followed by its converter registration so they stay co-located.
 
     nb::class_<graph::DummyKey1>(m, "DummyKey1")
         .def(nb::init<>())
         .def(nb::init<std::string>(), "symbol"_a)
         .def_rw("symbol", &graph::DummyKey1::symbol)
         .def("__repr__", [](const graph::DummyKey1& key) { return key.to_string(); });
+    graph::register_nb_key_converter(
+        typeid(graph::DummyKey1).name(), "DummyKey1",
+        [](const graph::IGraphKey& k) -> nb::object {
+            const auto& key = static_cast<const graph::KeyModel<graph::DummyKey1>&>(k).get();
+            return nb::cast(graph::DummyKey1{.symbol = key.symbol});
+        },
+        [](nb::handle h) -> graph::GraphKey {
+            return graph::DummyKey1{.symbol = nb::cast<std::string>(h.attr("symbol"))};
+        });
 
     nb::class_<graph::DummyKey2>(m, "DummyKey2")
         .def(nb::init<>())
         .def(nb::init<std::string>(), "index"_a)
         .def_rw("index", &graph::DummyKey2::index)
         .def("__repr__", [](const graph::DummyKey2& key) { return key.to_string(); });
+    graph::register_nb_key_converter(
+        typeid(graph::DummyKey2).name(), "DummyKey2",
+        [](const graph::IGraphKey& k) -> nb::object {
+            const auto& key = static_cast<const graph::KeyModel<graph::DummyKey2>&>(k).get();
+            return nb::cast(graph::DummyKey2{.index = key.index});
+        },
+        [](nb::handle h) -> graph::GraphKey {
+            return graph::DummyKey2{.index = nb::cast<std::string>(h.attr("index"))};
+        });
 
     nb::class_<graph::DummyKey3>(m, "DummyKey3")
         .def(nb::init<>())
         .def(nb::init<std::string>(), "symbol"_a)
         .def_rw("symbol", &graph::DummyKey3::symbol)
         .def("__repr__", [](const graph::DummyKey3& key) { return key.to_string(); });
+    graph::register_nb_key_converter(
+        typeid(graph::DummyKey3).name(), "DummyKey3",
+        [](const graph::IGraphKey& k) -> nb::object {
+            const auto& key = static_cast<const graph::KeyModel<graph::DummyKey3>&>(k).get();
+            return nb::cast(graph::DummyKey3{.symbol = key.symbol});
+        },
+        [](nb::handle h) -> graph::GraphKey {
+            return graph::DummyKey3{.symbol = nb::cast<std::string>(h.attr("symbol"))};
+        });
 
     nb::class_<graph::DummyKey4>(m, "DummyKey4")
         .def(nb::init<>())
@@ -66,6 +96,16 @@ NB_MODULE(core_bind, m)
         .def_rw("symbol", &graph::DummyKey4::symbol)
         .def_rw("index", &graph::DummyKey4::index)
         .def("__repr__", [](const graph::DummyKey4& key) { return key.to_string(); });
+    graph::register_nb_key_converter(
+        typeid(graph::DummyKey4).name(), "DummyKey4",
+        [](const graph::IGraphKey& k) -> nb::object {
+            const auto& key = static_cast<const graph::KeyModel<graph::DummyKey4>&>(k).get();
+            return nb::cast(graph::DummyKey4{.symbol = key.symbol, .index = key.index});
+        },
+        [](nb::handle h) -> graph::GraphKey {
+            return graph::DummyKey4{.symbol = nb::cast<std::string>(h.attr("symbol")),
+                                    .index  = nb::cast<std::string>(h.attr("index"))};
+        });
 
     nb::class_<graph::DummyKey5>(m, "DummyKey5")
         .def(nb::init<>())
@@ -73,6 +113,16 @@ NB_MODULE(core_bind, m)
         .def_rw("symbol", &graph::DummyKey5::symbol)
         .def_rw("index", &graph::DummyKey5::index)
         .def("__repr__", [](const graph::DummyKey5& key) { return key.to_string(); });
+    graph::register_nb_key_converter(
+        typeid(graph::DummyKey5).name(), "DummyKey5",
+        [](const graph::IGraphKey& k) -> nb::object {
+            const auto& key = static_cast<const graph::KeyModel<graph::DummyKey5>&>(k).get();
+            return nb::cast(graph::DummyKey5{.symbol = key.symbol, .index = key.index});
+        },
+        [](nb::handle h) -> graph::GraphKey {
+            return graph::DummyKey5{.symbol = nb::cast<std::string>(h.attr("symbol")),
+                                    .index  = nb::cast<std::string>(h.attr("index"))};
+        });
 
     nb::class_<graph::DummyKeyPy>(m, "DummyKeyPy")
         .def(nb::init<>())
@@ -80,12 +130,31 @@ NB_MODULE(core_bind, m)
         .def_rw("x", &graph::DummyKeyPy::x)
         .def_rw("y", &graph::DummyKeyPy::y)
         .def("__repr__", [](const graph::DummyKeyPy& key) { return key.to_string(); });
+    graph::register_nb_key_converter(
+        typeid(graph::DummyKeyPy).name(), "DummyKeyPy",
+        [](const graph::IGraphKey& k) -> nb::object {
+            const auto& key = static_cast<const graph::KeyModel<graph::DummyKeyPy>&>(k).get();
+            return nb::cast(graph::DummyKeyPy{.x = key.x, .y = key.y});
+        },
+        [](nb::handle h) -> graph::GraphKey {
+            return graph::DummyKeyPy{.x = nb::cast<int>(h.attr("x")),
+                                     .y = nb::cast<int>(h.attr("y"))};
+        });
 
     nb::class_<graph::PyKey>(m, "PyKey")
         .def(nb::init<>())
         .def(nb::init<std::string>(), "id"_a)
         .def_rw("id", &graph::PyKey::id)
         .def("__repr__", [](const graph::PyKey& key) { return key.to_string(); });
+    graph::register_nb_key_converter(
+        typeid(graph::PyKey).name(), "PyKey",
+        [](const graph::IGraphKey& k) -> nb::object {
+            const auto& key = static_cast<const graph::KeyModel<graph::PyKey>&>(k).get();
+            return nb::cast(graph::PyKey{.id = key.id});
+        },
+        [](nb::handle h) -> graph::GraphKey {
+            return graph::PyKey{.id = nb::cast<std::string>(h.attr("id"))};
+        });
 
     // Graph Values
 
@@ -153,25 +222,9 @@ NB_MODULE(core_bind, m)
         .def(nb::init<const graph::DummyKey5&>(), "key"_a);
 
     m.def(
-        "make_builder", [](const graph::DummyKey1& key) { return graph::make_builder(key); },
+        "make_builder",
+        [](const graph::GraphKey& key) { return key.make_builder(); },
         "key"_a);
-    m.def(
-        "make_builder", [](const graph::DummyKey2& key) { return graph::make_builder(key); },
-        "key"_a);
-    m.def(
-        "make_builder", [](const graph::DummyKey3& key) { return graph::make_builder(key); },
-        "key"_a);
-    m.def(
-        "make_builder", [](const graph::DummyKey4& key) { return graph::make_builder(key); },
-        "key"_a);
-    m.def(
-        "make_builder", [](const graph::DummyKey5& key) { return graph::make_builder(key); },
-        "key"_a);
-    m.def(
-        "make_builder", [](const graph::DummyKeyPy& key) { return graph::make_builder(key); },
-        "key"_a);
-    m.def(
-        "make_builder", [](const graph::PyKey& key) { return graph::make_builder(key); }, "key"_a);
 
     // Graph
 

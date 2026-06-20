@@ -39,7 +39,7 @@ struct TupleHash
     }
 
     template <class... Ts>
-        requires(requires(const Ts& x) { HasToTuple<Ts>; } && ...)
+        requires(HasToTuple<Ts> && ...)
 
     std::size_t operator()(const std::variant<Ts...>& v) const
     {

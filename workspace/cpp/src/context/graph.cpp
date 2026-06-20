@@ -220,22 +220,18 @@ void graph::Graph::insert(const KeySet& key)
 
 void graph::Graph::set_value(const GraphKey& key, CPtr<GraphValue> value)
 {
-    const auto lambda = [&]<typename Key>(const Key&)
+    if (key.allows_py_value_subclasses())
     {
-        if constexpr (std::is_same_v<Key, PyKey>)
-        {
-            PS_EXPECT_THAT(std::dynamic_pointer_cast<const PyValue>(value))
-                << "Error in 'Graph::set_value': Key " << Key::name() << " requires "
-                << Key::value_type_name() << ".";
-        }
-        else
-        {
-            PS_EXPECT_THAT(value->type_name() == Key::value_type_name())
-                << "Error in 'Graph::set_value': Value Type " << value->type_name() << ", but Key "
-                << Key::name() << " requires " << Key::value_type_name() << ".";
-        }
-    };
-    std::visit(lambda, key);
+        PS_EXPECT_THAT(std::dynamic_pointer_cast<const PyValue>(value))
+            << "Error in 'Graph::set_value': Key " << key.name() << " requires "
+            << key.value_type_name() << ".";
+    }
+    else
+    {
+        PS_EXPECT_THAT(value->type_name() == key.value_type_name())
+            << "Error in 'Graph::set_value': Value Type " << value->type_name() << ", but Key "
+            << key.name() << " requires " << key.value_type_name() << ".";
+    }
     _impl->set_value(key, value);
 }
 
@@ -271,7 +267,7 @@ void graph::Graph::GraphImpl::__init(const GraphKey& key)
         THROW << "Key " << to_string(key) << " already set.";
     }
     _map[key] = std::make_shared<ValueWrapper>();
-    _nodes[key] = std::visit([](const auto& key_) { return make_builder(key_); }, key);
+    _nodes[key] = key.make_builder();
 };
 
 namespace graph

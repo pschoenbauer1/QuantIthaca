@@ -1,6 +1,8 @@
 #pragma once
 
 #include <context/graph_value.h>
+#include <py/graph_key_caster.h>
+#include <py/graph_py_factory.h>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/trampoline.h>
@@ -25,7 +27,7 @@ struct PyGraphBuilder : PythonGraphBuilder
         KeySet result;
         for (nb::handle item : deps)
         {
-            result.insert(nb::cast<GraphKey>(item));
+            result.insert(graph::python_to_graph_key(item));
         }
         return result;
     }

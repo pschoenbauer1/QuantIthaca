@@ -162,9 +162,6 @@ inline bool is_python_builder(const GraphBuilder& builder)
     return dynamic_cast<const PythonGraphBuilder*>(&builder) != nullptr;
 }
 
-template <typename Key>
-CPtr<GraphBuilder> make_builder(const Key& key);
-
 using PyBuilderFactoryFn =
     std::function<CPtr<GraphBuilder>(const std::string& value_type_name, const GraphKey& key)>;
 
