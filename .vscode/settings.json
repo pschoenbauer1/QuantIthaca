@@ -1,11 +1,17 @@
 {
   "editor.formatOnSave": true,
+  "cmake.sourceDirectory": "${workspaceFolder}/workspace",
   "cmake.useCMakePresets": "always",
-  "cmake.useVsDeveloperEnvironment": "always",
+  "cmake.useVsDeveloperEnvironment": "never",
   "cmake.ignoreKitEnv": false,
-  "cmake.configurePreset": "windows-msvc-debug",
-  "cmake.buildPreset": "windows-msvc-debug",
+  "cmake.configurePreset": "linux-gcc-debug",
+  "cmake.buildPreset": "linux-gcc-debug",
+  "cmake.testPreset": "linux-gcc-debug",
   "cmake.automaticReconfigure": true,
+  "cmake.cmakePath": "${workspaceFolder}/workspace/.venv/bin/cmake",
+  "cmake.environment": {
+    "PATH": "${workspaceFolder}/workspace/.venv/bin:${env:PATH}"
+  },
   "cmake.ctestArgs": [
     "-V"
   ],
@@ -13,12 +19,12 @@
   "workbench.panel.defaultLocation": "left",
   "workbench.iconSize": "large",
   "workbench.activityBar.orientation": "vertical",
-  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+  "python.defaultInterpreterPath": "${workspaceFolder}/workspace/.venv/bin/python",
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
   "python.testing.pytestArgs": [
     "-s",
-    "tests/python"
+    "workspace/tests/python"
   ],
   "cmake.options.advanced": {
     "configurePreset": {

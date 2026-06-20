@@ -15,6 +15,7 @@ Hybrid Python + C++ repository using CMake + Ninja, nanobind bindings, uv-manage
 ## Local environment (uv)
 
 ```bash
+cd workspace
 uv sync --python 3.12 --extra test
 ```
 
@@ -23,19 +24,19 @@ uv sync --python 3.12 --extra test
 ### Windows (PowerShell)
 
 ```powershell
-./scripts/build_windows.ps1 -Compiler msvc -Config Debug
-./scripts/build_windows.ps1 -Compiler msvc -Config Release
-./scripts/build_windows.ps1 -Compiler clang -Config Debug
-./scripts/build_windows.ps1 -Compiler clang -Config Release
+./workspace/scripts/build_windows.ps1 -Compiler msvc -Config Debug
+./workspace/scripts/build_windows.ps1 -Compiler msvc -Config Release
+./workspace/scripts/build_windows.ps1 -Compiler clang -Config Debug
+./workspace/scripts/build_windows.ps1 -Compiler clang -Config Release
 ```
 
 ### Linux
 
 ```bash
-./scripts/build_linux.sh gcc Debug 3.12
-./scripts/build_linux.sh gcc Release 3.12
-./scripts/build_linux.sh clang Debug 3.12
-./scripts/build_linux.sh clang Release 3.12
+./workspace/scripts/build_linux.sh gcc Debug 3.12
+./workspace/scripts/build_linux.sh gcc Release 3.12
+./workspace/scripts/build_linux.sh clang Debug 3.12
+./workspace/scripts/build_linux.sh clang Release 3.12
 ```
 
 ## Run tests
@@ -45,13 +46,13 @@ uv sync --python 3.12 --extra test
 Windows:
 
 ```powershell
-./scripts/build_windows.ps1 -Compiler msvc -Config Debug -RunTests
+./workspace/scripts/build_windows.ps1 -Compiler msvc -Config Debug -RunTests
 ```
 
 Linux:
 
 ```bash
-./scripts/build_linux.sh gcc Debug 3.12 true
+./workspace/scripts/build_linux.sh gcc Debug 3.12 true
 ```
 
 ## Build wheels with uv (local)
@@ -59,13 +60,13 @@ Linux:
 Windows:
 
 ```powershell
-./scripts/build_wheels.ps1
+./workspace/scripts/build_wheels.ps1
 ```
 
 Linux:
 
 ```bash
-./scripts/build_wheels.sh
+./workspace/scripts/build_wheels.sh
 ```
 
 All wheels are written to `wheelhouse/`.
@@ -73,14 +74,14 @@ All wheels are written to `wheelhouse/`.
 ## Reproducible Docker wheel builds
 
 ```bash
-./scripts/docker_build_wheels.sh
+./workspace/scripts/docker_build_wheels.sh
 ```
 
 This builds wheels in Ubuntu containers for Python 3.11/3.12/3.13 and copies outputs into `wheelhouse/`.
 
 ## VS Code / Cursor build
 
-The default shortcut for **Run Build Task** is **Ctrl+Shift+B** (not F7). That runs the default task in `.vscode/tasks.json` (`Build (default)`), which invokes `scripts/build_windows.ps1` (MSVC Debug: `uv sync`, CMake preset configure, then build).
+The default shortcut for **Run Build Task** is **Ctrl+Shift+B** (not F7). That runs the default task in `.vscode/tasks.json` (`Build (default)`), which invokes `workspace/scripts/build_windows.ps1` (MSVC Debug: `uv sync`, CMake preset configure, then build).
 
 Visual Studio uses **F7** for build; VS Code/Cursor does **not** assign F7 to build unless you add a keybinding. To match Visual Studio, open **Keyboard Shortcuts (JSON)** and add:
 

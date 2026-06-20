@@ -75,6 +75,7 @@ add_library(core STATIC
   cpp/src/context_obj/py_obj.cpp
   cpp/src/utils/threads.cpp
 )
+set_target_properties(core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(core PUBLIC cpp/include cpp/src)
 install(TARGETS core LIBRARY DESTINATION quantithaca)
 

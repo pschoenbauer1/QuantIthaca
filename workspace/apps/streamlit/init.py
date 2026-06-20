@@ -6,8 +6,9 @@ from pathlib import Path
 
 def init() -> bool:
     """Add `python/` to sys.path and load `.env` from the repo root."""
-    repo_root = Path(__file__).resolve().parents[2]
-    python_root = repo_root / "python"
+    workspace_root = Path(__file__).resolve().parents[2]
+    repo_root = workspace_root.parent
+    python_root = workspace_root / "python"
     python_root_str = str(python_root)
     if python_root_str not in sys.path:
         sys.path.insert(0, python_root_str)

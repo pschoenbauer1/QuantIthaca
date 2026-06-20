@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+
 compiler="${1:-gcc}"   # gcc|clang
 config="${2:-Debug}"   # Debug|Release
 python_version="${3:-3.12}"
@@ -19,7 +22,7 @@ case "$compiler" in
     ;;
 esac
 
-uv sync --python "$python_version" --extra test
+uv sync --python "$python_version" --extra test --extra dev
 uv run --python "$python_version" cmake --preset "$preset"
 uv run --python "$python_version" cmake --build --preset "$preset"
 

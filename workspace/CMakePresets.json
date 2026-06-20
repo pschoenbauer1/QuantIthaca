@@ -105,7 +105,9 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "Python_EXECUTABLE": "${sourceDir}/.venv/bin/python",
+        "Python_ROOT_DIR": "${sourceDir}/.venv"
       }
     },
     {
@@ -114,7 +116,9 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "Python_EXECUTABLE": "${sourceDir}/.venv/bin/python",
+        "Python_ROOT_DIR": "${sourceDir}/.venv"
       }
     },
     {
@@ -123,7 +127,9 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "Python_EXECUTABLE": "${sourceDir}/.venv/bin/python",
+        "Python_ROOT_DIR": "${sourceDir}/.venv"
       }
     },
     {
@@ -132,7 +138,9 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "Python_EXECUTABLE": "${sourceDir}/.venv/bin/python",
+        "Python_ROOT_DIR": "${sourceDir}/.venv"
       }
     }
   ],

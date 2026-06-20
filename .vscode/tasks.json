@@ -4,7 +4,7 @@
     {
       "label": "Build (default)",
       "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File ./scripts/build_windows.ps1 -Compiler msvc -Config Debug",
+      "command": "powershell -ExecutionPolicy Bypass -File ./workspace/scripts/build_windows.ps1 -Compiler msvc -Config Debug",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -16,7 +16,7 @@
     {
       "label": "Test (Windows)",
       "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File ./scripts/build_windows.ps1 -Compiler msvc -Config Debug -RunTests"
+      "command": "powershell -ExecutionPolicy Bypass -File ./workspace/scripts/build_windows.ps1 -Compiler msvc -Config Debug -RunTests"
     }
   ]
 }

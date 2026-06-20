@@ -47,6 +47,10 @@ dependencies = [
 test = [
     "pypdf>=5.0.0",
 ]
+dev = [
+    "cmake>=3.25",
+    "ninja>=1.11",
+]
 
 [tool.scikit-build]
 minimum-version = "build-system.requires"

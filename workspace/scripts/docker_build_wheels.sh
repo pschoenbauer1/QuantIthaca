@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+
 mkdir -p wheelhouse
 for py in 3.11 3.12 3.13; do
   tag="quantithaca-wheel:${py}"
