@@ -53,7 +53,7 @@ public:
     }
 };
 
-void operator|(const RuntimeErrorBuilderHelper&, const RuntimeErrorBuilder& builder)
+[[noreturn]] void operator|(const RuntimeErrorBuilderHelper&, const RuntimeErrorBuilder& builder)
 {
     throw static_cast<std::runtime_error>(builder);
 }

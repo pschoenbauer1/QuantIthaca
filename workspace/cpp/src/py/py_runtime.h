@@ -4,7 +4,6 @@
 
 #include <cstdlib>
 #include <filesystem>
-#include <fstream>
 #include <mutex>
 #include <string>
 
@@ -24,30 +23,16 @@ inline void ensure_python_runtime(const std::filesystem::path& repo_root)
 {
     const auto python_dir = (repo_root / "python").string();
     const auto site_packages = (repo_root / ".venv" / "Lib" / "site-packages").string();
-    const auto pyvenv_cfg = repo_root / ".venv" / "pyvenv.cfg";
 
     static std::once_flag interpreter_once;
     std::call_once(interpreter_once,
                    [&]()
                    {
-                       std::ifstream cfg(pyvenv_cfg);
-                       std::string line;
-                       while (std::getline(cfg, line))
-                       {
-                           const std::string prefix = "home = ";
-                           if (line.rfind(prefix, 0) == 0)
-                           {
-                               const std::string home = line.substr(prefix.size());
 #ifdef _WIN32
-                               _putenv_s("PYTHONHOME", home.c_str());
-                               _putenv_s("PYTHONPATH", (python_dir + ";" + site_packages).c_str());
+                       _putenv_s("PYTHONPATH", (python_dir + ";" + site_packages).c_str());
 #else
-                               setenv("PYTHONHOME", home.c_str(), 1);
-                               setenv("PYTHONPATH", (python_dir + ":" + site_packages).c_str(), 1);
+                       setenv("PYTHONPATH", (python_dir + ":" + site_packages).c_str(), 1);
 #endif
-                               break;
-                           }
-                       }
                        static py::scoped_interpreter guard{};
                    });
 
