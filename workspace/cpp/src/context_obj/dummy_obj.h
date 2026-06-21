@@ -4,10 +4,76 @@
 
 #include <string>
 
-#include "graph_key.h"
-
 namespace graph
 {
+
+// ---------- Key structs ----------
+
+struct DummyKey1
+{
+    std::string symbol = "AAPL";
+
+    static std::string name() { return "DummyKey1"; }
+    std::string to_string() const { return "raw_price:" + symbol; }
+    auto to_tuple() const { return std::make_tuple(symbol); }
+    auto operator<=>(const DummyKey1&) const = default;
+};
+
+struct DummyKey2
+{
+    std::string index = "SOFR";
+
+    static std::string name() { return "DummyKey2"; }
+    std::string to_string() const { return "benchmark:" + index; }
+    auto to_tuple() const { return std::make_tuple(index); }
+    auto operator<=>(const DummyKey2&) const = default;
+};
+
+struct DummyKey3
+{
+    std::string symbol = "AAPL";
+
+    static std::string name() { return "DummyKey3"; }
+    std::string to_string() const { return "adjusted_price:" + symbol; }
+    auto to_tuple() const { return std::make_tuple(symbol); }
+    auto operator<=>(const DummyKey3&) const = default;
+};
+
+struct DummyKey4
+{
+    std::string symbol = "AAPL";
+    std::string index = "SOFR";
+
+    static std::string name() { return "DummyKey4"; }
+    std::string to_string() const { return "spread:" + symbol + "/" + index; }
+    auto to_tuple() const { return std::make_tuple(symbol, index); }
+    auto operator<=>(const DummyKey4&) const = default;
+};
+
+struct DummyKey5
+{
+    std::string symbol = "AAPL";
+    std::string index = "SOFR";
+
+    static std::string name() { return "DummyKey5"; }
+    std::string to_string() const { return "alpha:" + symbol + "/" + index; }
+    auto to_tuple() const { return std::make_tuple(symbol, index); }
+    auto operator<=>(const DummyKey5&) const = default;
+};
+
+// Python-backed node: builder class DummyValuePyBuilder in graph.graph_obj_builders
+struct DummyKeyPy
+{
+    int x = 1;
+    int y = 1;
+
+    static std::string name() { return "DummyKeyPy"; }
+    std::string to_string() const { return "py:" + std::to_string(x) + "/" + std::to_string(y); }
+    auto to_tuple() const { return std::make_tuple(x, y); }
+    auto operator<=>(const DummyKeyPy&) const = default;
+};
+
+// ---------- Value types ----------
 
 class DummyValue1 : public GraphValue
 {
@@ -74,6 +140,21 @@ public:
     std::string type_name() const override { return name(); }
 };
 
+class DummyValuePy : public GraphValue
+{
+    double _value;
+
+public:
+    explicit DummyValuePy(double value) : _value(value) {}
+
+    double value() const { return _value; }
+
+    static std::string name() { return "DummyValuePy"; }
+    std::string type_name() const override { return name(); }
+};
+
+// ---------- Builders ----------
+
 class DummyGraphBuilder1 : public GraphBuilder
 {
     DummyKey1 _key;
@@ -132,19 +213,6 @@ public:
     CPtr<GraphValue> value(const Graph& graph) const override;
 };
 
-class DummyValuePy : public GraphValue
-{
-    double _value;
-
-public:
-    explicit DummyValuePy(double value) : _value(value) {}
-
-    double value() const { return _value; }
-
-    static std::string name() { return "DummyValuePy"; }
-    std::string type_name() const override { return name(); }
-};
-
 class DummyKeyPyBuilder : public GraphBuilder
 {
     DummyKeyPy _key;
@@ -157,6 +225,8 @@ public:
 };
 
 }  // namespace graph
+
+// ---------- Mapping specializations ----------
 
 template <>
 struct graph::Mapping<graph::DummyKey1>

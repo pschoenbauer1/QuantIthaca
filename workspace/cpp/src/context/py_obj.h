@@ -1,12 +1,22 @@
 #pragma once
 
 #include <context/graph_value.h>
-#include <context_obj/key_model.h>
 
 #include <string>
 
 namespace graph
 {
+
+// Python-extensible value: builder class PyValueBuilder in graph.graph_obj_builders
+struct PyKey
+{
+    std::string id = "node";
+
+    static std::string name() { return "PyKey"; }
+    std::string to_string() const { return "py_value:" + id; }
+    auto to_tuple() const { return std::make_tuple(id); }
+    auto operator<=>(const PyKey&) const = default;
+};
 
 class PyValue : public GraphValue
 {

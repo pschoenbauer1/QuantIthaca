@@ -2,8 +2,6 @@
 #include "py_obj.h"
 
 #include <context/graph.h>
-#include <context/graph_value.h>
-#include <context_obj/graph_key.h>
 
 namespace graph
 {

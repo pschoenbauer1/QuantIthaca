@@ -72,7 +72,7 @@ add_library(core STATIC
   cpp/src/core.cpp
   cpp/src/context/graph.cpp
   cpp/src/context_obj/dummy_obj.cpp
-  cpp/src/context_obj/py_obj.cpp
+  cpp/src/context/py_obj.cpp
   cpp/src/utils/threads.cpp
 )
 set_target_properties(core PROPERTIES POSITION_INDEPENDENT_CODE ON)

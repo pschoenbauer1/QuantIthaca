@@ -1,6 +1,6 @@
 #include <context/graph.h>
 #include <context_obj/dummy_obj.h>
-#include <context_obj/py_obj.h>
+#include <context/py_obj.h>
 #include <gtest/gtest.h>
 #include <py/py_runtime.h>
 

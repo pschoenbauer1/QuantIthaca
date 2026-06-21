@@ -4,6 +4,7 @@ from importlib import import_module
 from pathlib import Path
 import sys
 
+from core_bind import *
 
 # def _load_core_bind():
 #     try:

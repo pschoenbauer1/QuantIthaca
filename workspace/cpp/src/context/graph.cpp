@@ -2,8 +2,7 @@
 #include "graph.h"
 
 #include <context/graph_value.h>
-#include <context_obj/graph_key.h>
-#include <context_obj/py_obj.h>
+#include <context/py_obj.h>
 #include <utils/containers.h>
 #include <utils/threads.h>
 

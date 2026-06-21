@@ -1,6 +1,6 @@
 #pragma once
 
-#include <context_obj/graph_key.h>
+#include <context/graph_key.h>
 #include <utils/exception.h>
 #include <utils/pointers.h>
 #include <utils/threads.h>

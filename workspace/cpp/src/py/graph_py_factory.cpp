@@ -2,9 +2,8 @@
 
 #include <context/graph.h>
 #include <context/graph_value.h>
+#include <context/py_obj.h>
 #include <context_obj/dummy_obj.h>
-#include <context_obj/graph_key.h>
-#include <context_obj/py_obj.h>
 #include <py/py_bridge.h>
 
 #if defined(PY_BRIDGE_USE_PYBIND)

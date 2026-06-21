@@ -1,7 +1,7 @@
 #pragma once
 
 #include <context/graph_value.h>
-#include <context_obj/i_graph_key.h>
+#include <context/graph_key.h>
 
 #include <functional>
 #include <string>

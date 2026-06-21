@@ -1,7 +1,5 @@
 #include <context/graph.h>
 #include <context_obj/dummy_obj.h>
-#include <context_obj/graph_key.h>
-#include <context_obj/key_model.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
